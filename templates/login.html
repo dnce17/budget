@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+
+{% block title %} 
+    Login 
+{% endblock %}
+
+{% block main %}
+    <form action="/login" method="post" class="login-form d-flex justify-content-center align-items-center">
+        <div class="login-ctnr d-inline-flex flex-column align-items-center">
+            <div class="username-ctnr">
+                <input name="username" type="text" placeholder="Username" class="input">
+            </div>
+            <div class="password-ctnr">
+                <input name="password" type="text" placeholder="Password" class="input">
+            </div>
+            <button class="login-btn" type="submit">Log In</button>
+            <div class="message">
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        {% for message in messages %}
+                            {{ message }}
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+        </div>
+    </form>
+{% endblock %}    
+
+{% block js %}
+    <script src="static/login.js"></script>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+
+{% block title %} 
+    Register 
+{% endblock %}
+
+{% block main %}
+    <form action="/register" method="post" class="register-form d-flex justify-content-center align-items-center">
+        <div class="register-ctnr d-inline-flex flex-column">
+            <div class="username-ctnr">
+                <input name="username" type="text" placeholder="Username" class="input username">
+            </div>
+            <div class="password-ctnr">
+                {% if password %}
+                    <input name="password" type="password" placeholder="Password" class="input password" value="{{ password }}">
+                {% else %}
+                    <input name="password" type="password" placeholder="Password" class="input password">
+                {% endif %}
+            </div>
+            <div class="confirm-ctnr">
+                {% if confirm %}
+                    <input name="confirm" type="password" placeholder="Confirm Password" class="input confirm" value="{{ confirm }}">
+                {% else %}
+                    <input name="confirm" type="password" placeholder="Confirm Password" class="input confirm">
+                {% endif %}
+            </div>
+            <button class="register-btn" type="submit">Register</button>
+            {% if message %}
+                <div>{{ message }}</div>
+            {% endif %}
+        </div>
+    </form>
+{% endblock %}    
+
+{% block js %}
+    <script src="static/register.js"></script>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+
+{% block title %} 
+    Homepage 
+{% endblock %}
+
+{% block main %}
+    <div class="bucket-ctnr text-center">
+        <h1>Money Buckets</h1>
+        <h3>You don't have any buckets made. Here's some suggestions to get you started!</h3>
+        <form action="/" method="post" class="bucket-form d-flex justify-content-center">
+            <div class="inner-bucket-ctnr d-inline-flex flex-column">
+                <table class="table bucket-table">
+                    <thead class="bucket-head">
+                        <tr>
+                            <th>Desired Buckets</th>
+                            <th>% Allocation</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bucket-body">
+                        <tr>
+                            <td><input class="bucket-input" type="text" name="bucket" placeholder="Enter bucket name" value="Basic Needs"></td>
+                            <td><input class="bucket-input allocation" type="number" name="allocation" placeholder="Desired % allocation"></td>
+                        </tr>
+                        <tr>
+                            <td><input class="bucket-input" type="text" name="bucket" placeholder="Enter bucket name" value="Investment Account"></td>
+                            <td><input class="bucket-input allocation" type="number" name="allocation" placeholder="Desired % allocation"></td>
+                        </tr>
+                        <tr>
+                            <td><input class="bucket-input" type="text" name="bucket" placeholder="Enter bucket name" value="Fun"></td>
+                            <td><input class="bucket-input allocation" type="number" name="allocation" placeholder="Desired % allocation"></td>
+                        </tr>
+                        <tr>
+                            <td><input class="bucket-input" type="text" name="bucket" placeholder="Enter bucket name"></td>
+                            <td><input class="bucket-input allocation" type="number" name="allocation" placeholder="Desired % allocation"></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="bucket-btn-ctnr ms-auto">
+                    <button class="cancel-btn">Cancel</button>
+                    <button class="delete-btn">Delete</button>
+                    <button class="add-btn">Add</button>
+                    <button class="save-btn">Save</button>
+                    <button class="edit-btn">Edit</button>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}

@@ -1,0 +1,55 @@
+.table th, .table td {
+    padding: 1rem;
+}
+
+.bucket-btn-ctnr button {
+    border: none;
+    padding: 0.5rem;
+    border-radius: 1.2rem;
+    margin-right: 1rem;
+}
+
+.login-form, .register-form {
+    margin-top: 1rem;
+    height: 70vh;
+}
+
+.login-form input, .register-form input {
+    border-radius: 1rem;
+    border: none;
+    background-color: rgba(83, 81, 78, 0.092);
+    padding: 0.7rem;
+    width: 12rem;
+}
+
+.login-ctnr, .register-ctnr {
+    gap: 1rem;
+    position: relative;
+    /* border: 1px solid purple; */
+}
+
+.login-btn, .register-btn {
+    border: none;
+    border-radius: 0.5rem;
+    background-color: purple;
+    padding: 0.7rem;
+    width: 12rem;
+}
+
+.message {
+    width: 100%;
+    height: 2rem;
+}
+
+/* JS Use */
+.saved {
+    background-color: white;
+    border: none;
+    pointer-events: none;
+}
+.saved:focus {
+    outline: none;
+}
+
+/* Credit */
+/* https://developer.mozilla.org/en-US/docs/Web/CSS/gap#flex_layout */
