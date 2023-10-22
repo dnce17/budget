@@ -30,9 +30,6 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-# Data to send to js, if needed
-data = "Bob"
-
 
 @app.after_request
 def after_request(response):
