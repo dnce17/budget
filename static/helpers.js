@@ -10,3 +10,20 @@ function isFilled(inputs) {
     }
     return true;
 }
+
+// NOTE: This activates the request.method == POST
+function sendToServer(dataToSend) {
+    $.ajax({
+        url: '/',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(dataToSend)
+    });
+}
+
+function toggleBucketInputs(inputs, bool) {
+    inputs.forEach((input) => {
+        input.classList.toggle('saved');
+        input.readOnly = bool;
+    });
+}

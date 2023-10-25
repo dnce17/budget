@@ -5,45 +5,68 @@
 {% endblock %}
 
 {% block main %}
-    <div class="bucket-ctnr text-center">
-        <h1>Money Buckets</h1>
-        <h3>You don't have any buckets made. Here's some suggestions to get you started!</h3>
-        <form action="/" method="post" class="bucket-form d-flex justify-content-center">
-            <div class="inner-bucket-ctnr d-inline-flex flex-column">
-                <table class="table bucket-table">
-                    <thead class="bucket-head">
-                        <tr>
-                            <th>Desired Buckets</th>
-                            <th>% Allocation</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bucket-body">
-                        <tr>
-                            <td><input class="bucket-input" type="text" name="bucket" placeholder="Enter bucket name" value="Basic Needs"></td>
-                            <td><input class="bucket-input allocation" type="number" name="allocation" placeholder="Desired % allocation"></td>
-                        </tr>
-                        <tr>
-                            <td><input class="bucket-input" type="text" name="bucket" placeholder="Enter bucket name" value="Investment Account"></td>
-                            <td><input class="bucket-input allocation" type="number" name="allocation" placeholder="Desired % allocation"></td>
-                        </tr>
-                        <tr>
-                            <td><input class="bucket-input" type="text" name="bucket" placeholder="Enter bucket name" value="Fun"></td>
-                            <td><input class="bucket-input allocation" type="number" name="allocation" placeholder="Desired % allocation"></td>
-                        </tr>
-                        <tr>
-                            <td><input class="bucket-input" type="text" name="bucket" placeholder="Enter bucket name"></td>
-                            <td><input class="bucket-input allocation" type="number" name="allocation" placeholder="Desired % allocation"></td>
-                        </tr>
-                    </tbody>
-                </table>
-                <div class="bucket-btn-ctnr ms-auto">
-                    <button class="cancel-btn">Cancel</button>
-                    <button class="delete-btn">Delete</button>
-                    <button class="add-btn">Add</button>
-                    <button class="save-btn">Save</button>
-                    <button class="edit-btn">Edit</button>
-                </div>
-            </div>
-        </form>
-    </div>
+<div class="bucket-ctnr text-center">
+	<h1>Money Buckets</h1>
+	{% if not existing %}
+		<h3>You don't have any buckets made. Here's some suggestions to get you started!</h3>
+	{% endif %}
+	<form action="/" method="post" class="bucket-form d-inline-block">
+		<table class="table bucket-table">
+			<thead class="bucket-head">
+				<tr>
+					<th>Desired Buckets</th>
+					<th>% Allocation</th>
+				</tr>
+			</thead>
+			<tbody class="bucket-body">
+				{% if existing %}
+					{% for bucket in existing %}
+						<tr>
+							<td><input class="bucket-input saved" type="text" name="bucket" placeholder="Enter bucket name" value="{{ bucket.name }}" readonly></td>
+							<td><input class="bucket-input allocation saved" type="number" name="allocation" placeholder="Desired % allocation" value="{{ bucket.percent_allocation }}" readonly></td>
+							<td class="no-border"><input class="delete" type="hidden" value="-"></td>
+						</tr> 
+					{% endfor%}
+				{% else %}
+					<tr>
+						<td><input class="bucket-input" type="text" name="bucket" placeholder="Enter bucket name" value="Basic Needs"></td>
+						<td><input class="bucket-input allocation" type="number" name="allocation" placeholder="Desired % allocation" value="20"></td>
+						<td class="no-border"><input class="delete" type="hidden" value="-"></td>
+					</tr> 
+					<tr>
+						<td><input class="bucket-input" type="text" name="bucket" placeholder="Enter bucket name" value="Investment Account"></td>
+						<td><input class="bucket-input allocation" type="number" name="allocation" placeholder="Desired % allocation" value="70"></td>
+						<td class="no-border"><input class="delete" type="hidden" value="-"></td>
+					</tr>
+					<tr>
+						<td><input class="bucket-input" type="text" name="bucket" placeholder="Enter bucket name" value="Fun"></td>
+						<td><input class="bucket-input allocation" type="number" name="allocation" placeholder="Desired % allocation" value="10"></td>
+						<td class="no-border"><input class="delete" type="hidden" value="-"></td>
+					</tr>
+					<tr>
+						<td><input class="bucket-input" type="text" name="bucket" placeholder="Enter bucket name"></td>
+						<td><input class="bucket-input allocation" type="number" name="allocation" placeholder="Desired % allocation"></td>
+						<td class="no-border"><input class="delete" type="hidden" value="-"></td>
+					</tr>
+				{% endif %}
+			</tbody>
+		</table>
+		<div class="first-layer-btns">
+			<button class="bucket-btn edit-btn">Edit</button>
+		</div>
+		<div class="second-layer-btns d-none">
+			<button class="bucket-btn save-btn">Save</button>
+			<button class="bucket-btn add-btn">Add</button>
+			<button class="bucket-btn delete-btn">Delete</button>
+			<button class="bucket-btn cancel-btn">Cancel</button>
+		</div>
+		<div class="third-layer-btns d-none">
+			<button class="bucket-btn back-btn">Back</button>
+		</div>
+	</form>
+</div>
 {% endblock %}
+
+<!-- LESSONS -->
+<!-- In order for request.form.get to work, the input must be directly within form tag -->
+<!-- form MUST be the parent, not grandparent or anything else -->

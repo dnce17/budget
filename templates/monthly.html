@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+
+{% block title %} 
+    Monthly Budget 
+{% endblock %}
+
+{% block main %}
+    <form action="/monthly" method="post">
+        <!-- <input class="form-control mx-auto w-auto shares-sell-input" id="symbol" name="symbol" type="text" placeholder="Stock to search"> -->
+        <table class="table bucket-table">
+			<thead class="bucket-head">
+				<tr>
+					<th>Desired Buckets</th>
+					<th>% Allocation</th>
+				</tr>
+			</thead>
+			<tbody class="bucket-body">
+				<tr>
+					<td><input class="bucket-input" type="text" name="bucket" placeholder="Enter bucket name" value="Basic Needs"></td>
+					<td><input class="bucket-input allocation" type="number" name="allocation" placeholder="Desired % allocation" value="20"></td>
+					<td class="no-border"><input class="delete" type="hidden" value="-"></td>
+				</tr> 
+				<tr>
+					<td><input class="bucket-input" type="text" name="bucket" placeholder="Enter bucket name" value="Investment Account"></td>
+					<td><input class="bucket-input allocation" type="number" name="allocation" placeholder="Desired % allocation" value="70"></td>
+					<td class="no-border"><input class="delete" type="hidden" value="-"></td>
+				</tr>
+				<tr>
+					<td><input class="bucket-input" type="text" name="bucket" placeholder="Enter bucket name" value="Fun"></td>
+					<td><input class="bucket-input allocation" type="number" name="allocation" placeholder="Desired % allocation" value="10"></td>
+					<td class="no-border"><input class="delete" type="hidden" value="-"></td>
+				</tr>
+			</tbody>
+		</table>
+        <input type="submit" name="builder" value="Save">
+        <input type="submit" name="add" value="Add Birthday">
+    </form>
+    <!-- <form action="/monthly" method="post">
+        <input class="form-control mx-auto w-auto shares-sell-input" id="symbol" name="symbol" type="text" placeholder="Stock to search">
+        <input class="form-control mx-auto w-auto shares-sell-input" id="shares" name="shares" type="number" min="1" placeholder="Shares to buy">
+        <button class="btn btn-primary" type="submit">Buy</button>
+    </form> -->
+{% endblock %}

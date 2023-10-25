@@ -2,11 +2,16 @@
     padding: 1rem;
 }
 
-.bucket-btn-ctnr button {
+.bucket-body input {
+    text-align: center;
+}
+
+.bucket-btn {
     border: none;
     padding: 0.5rem;
     border-radius: 1.2rem;
     margin-right: 1rem;
+    float: right;
 }
 
 .login-form, .register-form {
@@ -41,6 +46,21 @@
     height: 2rem;
 }
 
+/* index.html */
+.no-border {
+    border-style: none;
+    position: absolute;
+}
+
+.delete {
+    border-radius: 50%;
+    border: none;
+    background-color: red;
+    width: 1.7rem;
+    height: 1.7rem;
+    color: white;
+}
+
 /* JS Use */
 .saved {
     background-color: white;
@@ -53,3 +73,4 @@
 
 /* Credit */
 /* https://developer.mozilla.org/en-US/docs/Web/CSS/gap#flex_layout */
+/* https://blog.hubspot.com/website/css-border-radius-circle */

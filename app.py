@@ -43,21 +43,51 @@ def after_request(response):
 @app.route("/", methods=["GET", "POST"])
 @login_required
 def index():
-    # Load user's categories and % allocation, if done before
-    # Else load input boxes to make them
-
     if request.method == "POST":
+        # Save the data and update the database
+        data = request.get_json(silent=True)
+        if data is not None:
+            existing = db.execute("SELECT * FROM buckets WHERE owner_id = ?", session["user_id"])
+            if existing:
+                db.execute("DELETE FROM buckets WHERE owner_id = ?", session["user_id"])
 
-        zipped = zip(request.form.getlist('bucket'), request.form.getlist('allocation'))
-        allocated_buckets = list(zipped)
-        print(allocated_buckets[0][1])
+            for bucket in data:
+                db.execute("INSERT INTO buckets (owner_id, name, percent_allocation) VALUES (?, ?, ?)", 
+                    session["user_id"],
+                    data[bucket][0], 
+                    data[bucket][1]
+                )
 
-        # for bucket, allocation in zip(request.form.getlist('bucket'), request.form.getlist('allocation')):
-        db.execute("DROP TABLE buckets")
+            print("data recevied and bucket updated")
 
         return redirect("/")
     else:
+        # Load user's categories and % allocation, if exist
+        existing = db.execute("SELECT * FROM buckets WHERE owner_id = ?", session["user_id"])
+        if existing:
+            return render_template("index.html", existing=existing)
+
         return render_template("index.html")
+    
+@app.route("/monthly", methods=["GET", "POST"])
+@login_required
+def monthly():
+    if request.method == "POST":
+        print("POST")
+
+        # Under construction
+        if request.form.get("add"):
+            # print("bob")
+            # symbol = request.form.get("symbol")
+            # print(symbol)
+            print("add success")
+            return redirect("/monthly")
+        else:
+            print("error")
+            return redirect("/monthly")
+
+    else:
+        return render_template("monthly.html")
     
     
 @app.route("/login", methods=["GET", "POST"])
@@ -107,7 +137,7 @@ def register():
             return render_template("register.html", password=password, confirm=request.form.get("confirm"))
         
         # Proceed if all is good
-        db.execute('INSERT INTO users (username, hash) VALUES (?, ?)', username, generate_password_hash(password))
+        db.execute("INSERT INTO users (username, hash) VALUES (?, ?)", username, generate_password_hash(password))
         flash("Registration Successful!")
         return redirect("/login")
     else:
@@ -133,6 +163,7 @@ def logout():
 # https://stackoverflow.com/questions/50146815/getting-multiple-html-fields-with-same-name-using-getlist-with-flask-in-python
 # https://www.reddit.com/r/cs50/comments/fw50k5/message_flashing_not_working_with_redirect_to/
 # user "Priyatham" in https://stackoverflow.com/questions/57907655/how-to-use-pipreqs-to-create-requirements-txt-file
+# zip can be useful for combining list stuff
 
 # To use later
 # https://stackoverflow.com/questions/11547150/how-to-transfer-variable-data-from-python-to-javascript-without-a-web-server
