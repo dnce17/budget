@@ -28,9 +28,10 @@ function toggleBucketInputs(inputs, bool) {
     });
 }
 
-function makeChart(bucketNames, allocations, chartCanvas) {
+function makeChart(labelNames, labelAllocations, chartCanvas) {
      // Create or update pie chart
-     let labelNames = [], labelAllocations = [], colorsToUse = [];
+    //  let labelNames = [], labelAllocations = [], colorsToUse = [];
+    let colorsToUse = [];
 
      // CHECKPOINT: maybe make it more dynamic?
      let colors = [
@@ -43,13 +44,13 @@ function makeChart(bucketNames, allocations, chartCanvas) {
          'rgb(100, 82, 86)'
      ]
  
-     bucketNames.forEach((name) => {
-         labelNames.push(name.value);
-     })
-     allocations.forEach((allocation) => {
-         labelAllocations.push(allocation.value);
-     })
-     for (let i = 0; i < bucketNames.length; i++) {
+    //  bucketNames.forEach((name) => {
+    //      labelNames.push(name.value);
+    //  })
+    //  allocations.forEach((allocation) => {
+    //      labelAllocations.push(allocation.value);
+    //  })
+     for (let i = 0; i < labelNames.length; i++) {
          colorsToUse.push(colors[i]);
      }
  

@@ -45,18 +45,18 @@ def after_request(response):
 def index():
     if request.method == "POST":
         # Save the data and update the database
-        # data = request.get_json(silent=True)
-        # if data is not None:
-        #     existing = db.execute("SELECT * FROM buckets WHERE owner_id = ?", session["user_id"])
-        #     if existing:
-        #         db.execute("DELETE FROM buckets WHERE owner_id = ?", session["user_id"])
+        data = request.get_json(silent=True)
+        if data is not None:
+            existing = db.execute("SELECT * FROM buckets WHERE owner_id = ?", session["user_id"])
+            if existing:
+                db.execute("DELETE FROM buckets WHERE owner_id = ?", session["user_id"])
 
-        #     for bucket in data:
-        #         db.execute("INSERT INTO buckets (owner_id, name, percent_allocation) VALUES (?, ?, ?)", 
-        #             session["user_id"],
-        #             data[bucket][0], 
-        #             data[bucket][1]
-        #         )
+            for bucket in data:
+                db.execute("INSERT INTO buckets (owner_id, name, percent_allocation) VALUES (?, ?, ?)", 
+                    session["user_id"],
+                    data[bucket][0], 
+                    data[bucket][1]
+                )
 
         print("data recevied and bucket updated")
 

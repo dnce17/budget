@@ -7,9 +7,11 @@
 {% block main %}
 <div class="bucket-ctnr text-center">
 	<h1>Money Buckets</h1>
-	{% if not existing %}
-		<h3 class="get-started">You don't have any buckets made. Here's an example to get you started!</h3>
-	{% endif %}
+	<h3 class="get-started">
+		{% if not existing %}
+			You don't have any buckets made. Here's an example to get you started!
+		{% endif %}
+	</h3>
 	<form action="/" method="post" class="bucket-form d-inline-block">
 		<table class="table bucket-table">
 			<thead class="bucket-head">
@@ -22,8 +24,8 @@
 				{% if existing %}
 					{% for bucket in existing %}
 						<tr>
-							<td><input class="bucket-input bucket-name saved" type="text" name="bucket" placeholder="Enter bucket name" value="{{ bucket.name }}" readonly></td>
-							<td><input class="bucket-input allocation saved" type="number" name="allocation" placeholder="Desired % allocation" value="{{ bucket.percent_allocation }}" readonly></td>
+							<td><input class="bucket-input bucket-name saved existing" type="text" name="bucket" placeholder="Enter bucket name" value="{{ bucket.name }}" readonly></td>
+							<td><input class="bucket-input allocation saved existing" type="number" name="allocation" placeholder="Desired % allocation" value="{{ bucket.percent_allocation }}" readonly></td>
 							<td class="no-border"><input class="delete" type="hidden" value="-"></td>
 						</tr> 
 					{% endfor%}
@@ -66,7 +68,12 @@
 	</form>
 </div>
 <div class="chart-ctnr d-flex">
-	<canvas class="pie-chart"></canvas>
+	<!-- <canvas class="pie-chart"></canvas> -->
+	{% if existing %}
+		<canvas class="pie-chart made"></canvas>
+	{% else %}
+		<canvas class="pie-chart"></canvas>
+	{% endif %}
 </div>
 {% endblock %}
 
