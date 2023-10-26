@@ -61,6 +61,12 @@
     color: white;
 }
 
+.pie-chart {
+    width: 30rem !important;
+    height: 30rem !important;
+    margin: 0 auto;
+}
+
 /* JS Use */
 .saved {
     background-color: white;
@@ -74,3 +80,4 @@
 /* Credit */
 /* https://developer.mozilla.org/en-US/docs/Web/CSS/gap#flex_layout */
 /* https://blog.hubspot.com/website/css-border-radius-circle */
+/* https://stackoverflow.com/questions/37621020/setting-width-and-height */

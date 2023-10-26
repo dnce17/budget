@@ -27,3 +27,45 @@ function toggleBucketInputs(inputs, bool) {
         input.readOnly = bool;
     });
 }
+
+function makeChart(bucketNames, allocations, chartCanvas) {
+     // Create or update pie chart
+     let labelNames = [], labelAllocations = [], colorsToUse = [];
+
+     // CHECKPOINT: maybe make it more dynamic?
+     let colors = [
+         'rgb(255, 99, 132)',
+         'rgb(54, 162, 235)',
+         'rgb(255, 205, 86)',
+         'rgb(218, 247, 166)',
+         'rgb(255, 87, 51)',
+         'rgb(88, 24, 69)',
+         'rgb(100, 82, 86)'
+     ]
+ 
+     bucketNames.forEach((name) => {
+         labelNames.push(name.value);
+     })
+     allocations.forEach((allocation) => {
+         labelAllocations.push(allocation.value);
+     })
+     for (let i = 0; i < bucketNames.length; i++) {
+         colorsToUse.push(colors[i]);
+     }
+ 
+     let chart = new Chart(chartCanvas, {
+         type: 'pie',
+         data: {
+             labels: labelNames,
+             datasets: [{
+                 // label: 'Money Buckets and Allocations',
+                 data: labelAllocations,
+                 backgroundColor: colorsToUse,
+                 hoverOffset: 4
+             }]
+         },
+         // plugins: [ChartDataLabels]
+     });
+
+     return chart;
+}

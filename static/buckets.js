@@ -9,11 +9,18 @@ let layerOneBtns = document.querySelector('.first-layer-btns');
 let layerTwoBtns = document.querySelector('.second-layer-btns');
 let layerThreeBtns = document.querySelector('.third-layer-btns');
 
+const chartCanvas = document.querySelector('.pie-chart');
+let chart;
+
 saveBtn.addEventListener('click', (e) => {
     e.preventDefault();
     let bucketInputs = document.querySelectorAll('.bucket-input');
-    let bucketBtns = document.querySelectorAll('.bucket-btn');
     let allocations = document.querySelectorAll('.allocation');
+    let bucketNames = document.querySelectorAll('.bucket-name');
+
+    // Remove the get started message
+    let getStarted = document.querySelector('.get-started');
+    getStarted.textContent = '';
 
     // Check if all inputs are filled
     if (isFilled(bucketInputs) == false) {
@@ -44,13 +51,26 @@ saveBtn.addEventListener('click', (e) => {
     layerOneBtns.classList.toggle('d-none');
     layerTwoBtns.classList.toggle('d-none');
     toggleBucketInputs(bucketInputs, true);
+    
+    // Create chart
+    if (!chartCanvas.classList.contains('made')) {
+        chart = makeChart(bucketNames, allocations, chartCanvas);
+        chartCanvas.classList.toggle('made');
+        console.log('chart made');
+    }
+    // Update chart if it exist already
+    else if (chartCanvas.classList.contains('made')) {
+        chart.destroy();
+        chart = makeChart(bucketNames, allocations, chartCanvas);
+        console.log('chart updated');
+    }
+
 });
 
 editBtn.addEventListener('click', (e) => {
     e.preventDefault();
     let bucketInputs = document.querySelectorAll('.bucket-input');
 
-    // toggleBucketBtns(bucketBtns);
     layerOneBtns.classList.toggle('d-none');
     layerTwoBtns.classList.toggle('d-none');
     toggleBucketInputs(bucketInputs, false);
@@ -60,7 +80,7 @@ addBtn.addEventListener('click', (e) => {
     e.preventDefault();
     let bucketBody = document.querySelector('.bucket-body');
     let row = document.createElement('tr');
-    row.innerHTML = '<td><input class="bucket-input" type="text" name="bucket" placeholder="Enter bucket name"></td><td><input class="bucket-input allocation" type="number" name="allocation" placeholder="Desired % allocation"></td><td class="no-border"><input class="delete" type="hidden" value="-"></td>'
+    row.innerHTML = '<td><input class="bucket-input bucket-name" type="text" name="bucket" placeholder="Enter bucket name"></td><td><input class="bucket-input allocation" type="number" name="allocation" placeholder="Desired % allocation"></td><td class="no-border"><input class="delete" type="hidden" value="-"></td>'
     bucketBody.appendChild(row);
 });
 
@@ -96,12 +116,10 @@ backBtn.addEventListener('click', (e) => {
     layerThreeBtns.classList.toggle('d-none');
 });
 
+
 // NOTE to self
 // preventDefault also changes the value of "this" also
 
-// ANSWER this question since you found out
-// https://stackoverflow.com/questions/56385294/request-form-does-not-return-form-python-flask-even-with-name-attribute
-
-// GOALS
-// turn delete into a "back" btn upon click
-// create clone of table upon clicking edit. When clicking cancel, revert back to that
+// Credit
+// https://chartjs-plugin-datalabels.netlify.app/guide/labels.html#multiple-labels
+// https://quickchart.io/documentation/chart-js/custom-pie-doughnut-chart-labels/

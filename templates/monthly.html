@@ -5,39 +5,102 @@
 {% endblock %}
 
 {% block main %}
-    <form action="/monthly" method="post">
-        <!-- <input class="form-control mx-auto w-auto shares-sell-input" id="symbol" name="symbol" type="text" placeholder="Stock to search"> -->
-        <table class="table bucket-table">
-			<thead class="bucket-head">
-				<tr>
-					<th>Desired Buckets</th>
-					<th>% Allocation</th>
-				</tr>
-			</thead>
-			<tbody class="bucket-body">
-				<tr>
-					<td><input class="bucket-input" type="text" name="bucket" placeholder="Enter bucket name" value="Basic Needs"></td>
-					<td><input class="bucket-input allocation" type="number" name="allocation" placeholder="Desired % allocation" value="20"></td>
-					<td class="no-border"><input class="delete" type="hidden" value="-"></td>
-				</tr> 
-				<tr>
-					<td><input class="bucket-input" type="text" name="bucket" placeholder="Enter bucket name" value="Investment Account"></td>
-					<td><input class="bucket-input allocation" type="number" name="allocation" placeholder="Desired % allocation" value="70"></td>
-					<td class="no-border"><input class="delete" type="hidden" value="-"></td>
-				</tr>
-				<tr>
-					<td><input class="bucket-input" type="text" name="bucket" placeholder="Enter bucket name" value="Fun"></td>
-					<td><input class="bucket-input allocation" type="number" name="allocation" placeholder="Desired % allocation" value="10"></td>
-					<td class="no-border"><input class="delete" type="hidden" value="-"></td>
-				</tr>
-			</tbody>
-		</table>
-        <input type="submit" name="builder" value="Save">
-        <input type="submit" name="add" value="Add Birthday">
-    </form>
-    <!-- <form action="/monthly" method="post">
-        <input class="form-control mx-auto w-auto shares-sell-input" id="symbol" name="symbol" type="text" placeholder="Stock to search">
-        <input class="form-control mx-auto w-auto shares-sell-input" id="shares" name="shares" type="number" min="1" placeholder="Shares to buy">
-        <button class="btn btn-primary" type="submit">Buy</button>
-    </form> -->
+<div>
+  <canvas id="myChart"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+const ctx = document.getElementById('myChart');
+
+new Chart(ctx, {
+type: 'pie',
+data: {
+	labels: ['Basic Needs', 'Blue', 'Yellow'],
+	datasets: [{
+		label: 'My First Dataset',
+		data: [70, 15, 15],
+		backgroundColor: [
+			'rgb(255, 99, 132)',
+			'rgb(54, 162, 235)',
+			'rgb(255, 205, 86)'
+		],
+		hoverOffset: 4
+	}]
+},
+// options: {
+// 	scales: {
+// 	y: {
+// 		beginAtZero: true
+// 	}
+// 	}
+// }
+});
+
+// const ctx = document.getElementById('myChart');
+
+// new Chart(ctx, {
+// type: 'pie',
+// data: {
+//   labels: [
+//     'Red',
+//     'Blue',
+//     'Yellow'
+//   ]},
+//   datasets: [{
+//     label: 'My First Dataset',
+//     data: [300, 50, 100],
+//     backgroundColor: [
+//       'rgb(255, 99, 132)',
+//       'rgb(54, 162, 235)',
+//       'rgb(255, 205, 86)'
+//     ],
+//     hoverOffset: 4
+//   }]
+// });
+
+// oline version
+// const ctx = document.getElementById('myChart');
+// var chartId = new Chart(ctx, {
+// 	type: 'pie',
+// 	data: {
+// 	labels: ["HTML", "CSS", "JAVASCRIPT", "CHART.JS", "JQUERY", "BOOTSTRP"],
+// 	datasets: [{
+// 		label: "online tutorial subjects",
+// 		data: [20, 40, 13, 35, 20, 38],
+// 		backgroundColor: ['yellow', 'aqua', 'pink', 'lightgreen', 'gold', 'lightblue'],
+// 		hoverOffset: 5
+// 	}],
+// 	},
+// 	options: {
+// 	responsive: false,
+// 	},
+// });
+  
+
+// const ctx = document.getElementById('myChart');
+
+// new Chart(ctx, {
+// type: 'bar',
+// data: {
+// 	labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+// 	datasets: [{
+// 	label: '# of Votes',
+// 	data: [12, 19, 3, 5, 2, 3],
+// 	borderWidth: 1
+// 	}]
+// },
+// options: {
+// 	scales: {
+// 	y: {
+// 		beginAtZero: true
+// 	}
+// 	}
+// }
+// });
+</script>
+ 
+
 {% endblock %}
