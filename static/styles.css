@@ -1,3 +1,7 @@
+.dropdown {
+    margin-right: 5rem;
+}
+
 .table th, .table td {
     padding: 1rem;
 }
@@ -8,10 +12,11 @@
 
 .bucket-btn {
     border: none;
-    padding: 0.5rem;
+    padding: 0.3rem;
     border-radius: 1.2rem;
     margin-right: 1rem;
     float: right;
+    font-size: 14px;
 }
 
 .login-form, .register-form {
@@ -67,6 +72,74 @@
     margin: 0 auto;
 }
 
+/* monthly.html */
+.transaction {
+    height: 2rem;
+    text-align: center;
+}
+
+/* .type-ctnr {
+    border: 1px solid red;
+} */
+
+.tooltip-icon {
+    border: 1px solid black;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    text-align: center;
+}
+
+.tooltip-icon::before,
+.tooltip-icon::after  {
+    position: absolute;
+    top: 3rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: black;
+    color: white;
+    width: 15rem;
+}
+
+.tooltip-icon:hover::before {
+    padding: 0.5rem;
+    content: attr(data-tooltip);
+    font-size: 12px;
+    border-radius: 1rem;
+    height: max-content;
+}
+
+.tooltip-icon:hover::after {
+    /* Make the tooltip arrow */
+	content: '';
+    position: absolute;
+	width: 0;
+	height: 0;
+	border: 10px solid transparent;
+	border-bottom-color: black;
+	border-top: 0;
+    transform: translateX(-50%) translateY(-100%);
+    background-color: white;
+}
+
+/* transaction.html */
+.money-ctnr, .transaction-ctnr {
+    margin-top: 3rem;
+}
+
+.transaction-form, .wrap-ctnr {
+    margin-top: 2rem;
+}
+/* 
+.inner-transaction-ctnr {
+    border: 1px solid green;
+} */
+
+.transaction-form .bucket-btn {
+    margin-left: 1rem;
+}
+
+
 /* JS Use */
 .saved {
     background-color: white;
@@ -81,3 +154,5 @@
 /* https://developer.mozilla.org/en-US/docs/Web/CSS/gap#flex_layout */
 /* https://blog.hubspot.com/website/css-border-radius-circle */
 /* https://stackoverflow.com/questions/37621020/setting-width-and-height */
+/* https://projects.verou.me/bubbly/ */
+/* https://www.youtube.com/watch?v=ujlpzTyJp-M */

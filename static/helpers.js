@@ -70,3 +70,18 @@ function makeChart(labelNames, labelAllocations, chartCanvas) {
 
      return chart;
 }
+
+function displayNameMoney() {
+    let username = document.querySelector('.username');
+    let balance = document.querySelector('.balance');
+
+    fetch('/api/data')
+        .then(res => res.json())
+        .then(data => {
+            let arr = data.split(", ");
+            let name = arr[0], money = arr[1];
+            
+            username.textContent = name;
+            balance.textContent += money;
+        });
+}

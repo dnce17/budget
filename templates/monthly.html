@@ -5,102 +5,68 @@
 {% endblock %}
 
 {% block main %}
-<div>
-  <canvas id="myChart"></canvas>
+<div class="bucket-ctnr text-center">
+	<h1>Monthly Budget</h1>
+	<h3 class="get-started">
+		{% if not existing %}
+			You don't have any money buckets made. Click <a href="/">here</a> to get started! 
+		{% endif %}
+	</h3>
+	<form action="/monthly" method="post" class="bucket-form d-inline-block">
+		<table class="table bucket-table">
+			<thead class="bucket-head">
+				<tr>
+					<th>Buckets</th>
+					<th>Desired Spending Limit per Month</th>
+				</tr>
+			</thead>
+			<tbody class="bucket-body">
+				{% if existing %}
+					{% for bucket in existing %}
+						<tr>
+							<td><input class="bucket-input bucket-name saved existing" type="text" name="bucket" placeholder="Enter bucket name" value="{{ bucket.name }}" readonly></td>
+							<td><input class="bucket-input limit saved existing" type="number" name="limit" placeholder="--" readonly></td>
+						</tr> 
+					{% endfor%}
+				{% endif %}
+			</tbody>
+		</table>
+		<div class="first-layer-btns">
+			<button class="bucket-btn edit-btn">Edit</button>
+		</div>
+		<div class="second-layer-btns d-none">
+			<button class="bucket-btn save-btn">Save</button>
+			<button class="bucket-btn cancel-btn">Cancel</button>
+		</div>
+	</form>
 </div>
+<!-- <div class="transaction-ctnr">
+	<form action="/monthly" method="post" class="bucket-form d-inline-block">
+		<select name="buckets" class="transaction">
+			<option value="buckets" disabled selected>-Select a Bucket-</option>
+				{% for bucket in existing %}
+					<option value="{{ bucket.name }}">{{ bucket.name }}</option>
+				{% endfor%}
+		</select>
+		<div class="type-ctnr d-inline-block">
+			<input class="type" type="text" name="type" placeholder="Item Type">
+			<div class="position-relative d-inline-block position-relative">
+				<span class="tooltip-icon d-inline-block" 
+				data-tooltip='Item type as in grocery, clothes, toys, lunch, etc. Try to be general and consistent with them;
+				for example, if you have already used "clothes" as a type, stick with that instead of saying "pants" next time.
+				Another example is sticking with "dinner" rather than specifying "hamburger" or "ribs."'>?
+				</span>
+			</div>
+		</div>
+		<div class="inner-transaction-ctnr d-inline-block">
+			<span>$</span>
+			<input class="transaction" type="number" name="transaction" placeholder="--">
+		</div>
+		<button class="bucket-btn submit-btn">Submit</button>
+	</form>
+</div> -->
+{% endblock %}
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script>
-
-const ctx = document.getElementById('myChart');
-
-new Chart(ctx, {
-type: 'pie',
-data: {
-	labels: ['Basic Needs', 'Blue', 'Yellow'],
-	datasets: [{
-		label: 'My First Dataset',
-		data: [70, 15, 15],
-		backgroundColor: [
-			'rgb(255, 99, 132)',
-			'rgb(54, 162, 235)',
-			'rgb(255, 205, 86)'
-		],
-		hoverOffset: 4
-	}]
-},
-// options: {
-// 	scales: {
-// 	y: {
-// 		beginAtZero: true
-// 	}
-// 	}
-// }
-});
-
-// const ctx = document.getElementById('myChart');
-
-// new Chart(ctx, {
-// type: 'pie',
-// data: {
-//   labels: [
-//     'Red',
-//     'Blue',
-//     'Yellow'
-//   ]},
-//   datasets: [{
-//     label: 'My First Dataset',
-//     data: [300, 50, 100],
-//     backgroundColor: [
-//       'rgb(255, 99, 132)',
-//       'rgb(54, 162, 235)',
-//       'rgb(255, 205, 86)'
-//     ],
-//     hoverOffset: 4
-//   }]
-// });
-
-// oline version
-// const ctx = document.getElementById('myChart');
-// var chartId = new Chart(ctx, {
-// 	type: 'pie',
-// 	data: {
-// 	labels: ["HTML", "CSS", "JAVASCRIPT", "CHART.JS", "JQUERY", "BOOTSTRP"],
-// 	datasets: [{
-// 		label: "online tutorial subjects",
-// 		data: [20, 40, 13, 35, 20, 38],
-// 		backgroundColor: ['yellow', 'aqua', 'pink', 'lightgreen', 'gold', 'lightblue'],
-// 		hoverOffset: 5
-// 	}],
-// 	},
-// 	options: {
-// 	responsive: false,
-// 	},
-// });
-  
-
-// const ctx = document.getElementById('myChart');
-
-// new Chart(ctx, {
-// type: 'bar',
-// data: {
-// 	labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-// 	datasets: [{
-// 	label: '# of Votes',
-// 	data: [12, 19, 3, 5, 2, 3],
-// 	borderWidth: 1
-// 	}]
-// },
-// options: {
-// 	scales: {
-// 	y: {
-// 		beginAtZero: true
-// 	}
-// 	}
-// }
-// });
-</script>
- 
-
+{% block js %}
+	<script src="static/monthly.js"></script>
 {% endblock %}
