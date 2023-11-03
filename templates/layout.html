@@ -23,7 +23,7 @@
                     <a class="nav-link" aria-current="page" href="/">Money Allocation</a>
                     <a class="nav-link" href="/monthly">Monthly Budget</a>
                     <a class="nav-link" href="/transaction">Add Cash/Transaction</a>
-                    <a class="nav-link" href="#">History</a>
+                    <a class="nav-link" href="/history">History</a>
                   </div>
                   <div class="navbar-nav ms-auto">
                     <a class="nav-link username" href="#">{{ username }}</a>
@@ -39,7 +39,7 @@
               </div>
             </div>
         </nav>
-        <main>
+        <main class="m-top">
           {% block main %}{% endblock %}
         </main>
         {% block js %}{% endblock %}

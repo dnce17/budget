@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+
+{% block title %} 
+    History
+{% endblock %}
+
+{% block main %}
+<h1 class="text-center">Transaction History</h1>
+<table class="table">
+    <tr>
+        <th>Bucket</th>
+        <th>Item Type</th>
+        <th>Amount</th>
+        <th>New Balance</th>
+        <th>Date</th>
+        <th>Time</th>
+    </tr>
+        {% for transaction in transactions %}
+            <tr>
+                <td>{{ transaction.bucket }}</td>
+                <td>{{ transaction.item_type }}</td>
+                <td>{{ usd(transaction.amt) }}</td>
+                <td>{{ usd(transaction.new_balance) }}</td>
+                <td>{{ transaction.date }}</td>
+                <td>{{ transaction.time }}</td>
+            </tr>
+        {% endfor %}
+</table>
+{% endblock %}
+
+{% block js %}
+	<script src="static/history.js"></script>
+{% endblock %}

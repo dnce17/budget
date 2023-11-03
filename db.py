@@ -33,13 +33,16 @@ db = con.cursor()
 #                               )"""
 #                           )
 
-# db.execute("ALTER TABLE users RENAME TO users_old")
-
-create_user = db.execute("""CREATE TABLE users (
+create_history = db.execute("""CREATE TABLE history (
                                 id INTEGER NOT NULL,
-                                username TEXT NOT NULL,
-                                hash TEXT NOT NULL,
-                                money NUMERIC DEFAULT "0",
+                                owner_id INTEGER NOT NULL,
+                                item_type TEXT,
+                                bucket TEXT NOT NULL,
+                                amt NUMERIC NOT NULL,
+                                new_balance NUMERIC NOT NULL,
+                                date DATE NOT NULL,
+                                time TIME NOT NULL,
+                                FOREIGN KEY(owner_id) REFERENCES users(id),
                                 PRIMARY KEY(id)
                               )"""
                           )

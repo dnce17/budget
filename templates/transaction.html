@@ -5,8 +5,8 @@
 {% endblock %}
 
 {% block main %}
-<div class="message text-center">
-	{% with messages = get_flashed_messages() %}
+<div class="message transaction-message text-center">
+	{% with messages = get_flashed_messages(category_filter=["error_one"]) %}
 		{% if messages %}
 			{% for message in messages %}
 				{{ message }}
@@ -16,22 +16,31 @@
 </div>
 <div class="money-ctnr text-center">
     <h1>Add Money to Balance</h1>
-    <form action="/transaction" method="post" class="transaction-form d-inline-block">
+    <form action="/transaction" method="post" class="transaction-form d-inline-block m-top">
         <div class="inner-money-ctnr d-inline-block">
 			<span>$</span>
-			<input class="money text-center" type="text" name="money" step="0.01" placeholder="--">
+			<input class="money text-center two-decimal" type="number" name="money" step="0.01" placeholder="--">
 		</div>
-        <button class="bucket-btn transaction-btn submit-btn">Submit</button>
+		<input class="bucket-btn transaction-btn submit-money-btn" name="submit-money-btn" type="submit" value="Submit">
     </form>
+	<div class="message transaction-message text-center m-top">
+		{% with messages = get_flashed_messages(category_filter=["error_two"]) %}
+			{% if messages %}
+				{% for message in messages %}
+					{{ message }}
+				{% endfor %}
+			{% endif %}
+		{% endwith %}
+	</div>
 </div>
-<div class="transaction-ctnr text-center">
+<div class="transaction-ctnr text-center m-top">
     <h1>Add Transaction</h1>
     <h3 class="get-started">
-        {% if not placeholder %}
+        {% if not existing %}
             You don't have any money buckets made. Click <a href="/">here</a> to get started! 
         {% endif %}
     </h3>
-	<form action="/transaction" method="post" class="transaction-form d-inline-block">
+	<form action="/transaction" method="post" class="transaction-form d-inline-block m-top">
 		<select name="buckets" class="transaction">
 			<option value="buckets" disabled selected>-Select a Bucket-</option>
 				{% for bucket in existing %}
@@ -39,7 +48,7 @@
 				{% endfor%}
 		</select>
 		<div class="type-ctnr d-inline-block">
-			<input class="type" type="text" name="type" placeholder="Item Type">
+			<input class="type transaction" type="text" name="type" placeholder="Item Type (Optional)">
 			<div class="position-relative d-inline-block position-relative">
 				<span class="tooltip-icon d-inline-block" 
 				data-tooltip='Item type as in grocery, clothes, toys, lunch, etc. Try to be general and consistent with them;
@@ -48,14 +57,23 @@
 				</span>
 			</div>
 		</div>
-        <div class="wrap-ctnr">
+        <div class="wrap-ctnr m-top">
             <div class="inner-transaction-ctnr d-inline-block">
                 <span>$</span>
-                <input class="transaction" type="number" name="transaction" step="0.01" placeholder="--">
-                <button class="bucket-btn transaction-btn submit-btn">Submit</button>
+                <input class="transaction two-decimal" type="number" name="transaction" step="0.01" placeholder="--">
+				<input class="bucket-btn transaction-btn submit-transaction-btn" name="submit-transaction-btn" type="submit" value="Submit">
             </div>
         </div>
 	</form>
+	<div class="message transaction-message text-center m-top">
+		{% with messages = get_flashed_messages(category_filter=["error_three"]) %}
+			{% if messages %}
+				{% for message in messages %}
+					{{ message }}
+				{% endfor %}
+			{% endif %}
+		{% endwith %}
+	</div>
 </div>
 {% endblock %}
 

@@ -123,22 +123,30 @@
 }
 
 /* transaction.html */
-.money-ctnr, .transaction-ctnr {
-    margin-top: 3rem;
+/* .money-ctnr, .transaction-ctnr {
+    margin-top: 2rem;
 }
 
 .transaction-form, .wrap-ctnr {
     margin-top: 2rem;
-}
+} */
 /* 
 .inner-transaction-ctnr {
     border: 1px solid green;
+} */
+
+/* .transaction-message {
+    margin-top: 2rem;
 } */
 
 .transaction-form .bucket-btn {
     margin-left: 1rem;
 }
 
+/* All HTML use */
+.m-top {
+    margin-top: 2rem;
+}
 
 /* JS Use */
 .saved {

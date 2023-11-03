@@ -5,6 +5,8 @@ from flask_session import Session
 from cs50 import SQL
 from werkzeug.security import check_password_hash, generate_password_hash
 import json
+from datetime import datetime
+from pytz import timezone
 
 from helpers import login_required, is_float, usd
 
@@ -21,15 +23,6 @@ Session(app)
 
 # Connect database
 db = SQL("sqlite:///budget.db")
-
-# Decorate routes to require login.
-# def login_required(f):
-#     @wraps(f)
-#     def decorated_function(*args, **kwargs):
-#         if session.get("user_id") is None:
-#             return redirect("/login")
-#         return f(*args, **kwargs)
-#     return decorated_function
 
 
 @app.after_request
@@ -59,7 +52,7 @@ def index():
                     data[bucket][1]
                 )
 
-        print("data recevied and bucket updated")
+        print("data received and bucket updated")
 
         return redirect("/")
     else:
@@ -118,10 +111,8 @@ def login():
         money = db.execute(
             "SELECT money FROM users WHERE username = ?", request.form.get("username").lower()
         )
-
         file = open("static/data.json", "w")
         file.write(f"{username[0]['username'].capitalize()}, {usd(money[0]['money'])}")
-
 
         # Redirect user to home page
         return redirect("/")
@@ -162,17 +153,13 @@ def transaction():
         # Update balance in users table
         # Add to history 
 
-        if request.form.get("money"):
-            # To check if value is float or int
-            # def is_float(val):
-            #     try:
-            #         float(val) 
-            #         # Will return True for int also
-            #         return True
-            #     except ValueError:
-            #         return False
-
+        if request.form.get("submit-money-btn"):
             money = request.form.get("money")
+
+            if not money:
+                flash("Must type in an amount", "error_two")
+                return redirect("/transaction")
+
             if is_float(money):
                 # Get the current money in user and add it to amt they want to add
                 current = db.execute("SELECT money FROM users WHERE id = ?", session["user_id"])[0]["money"]
@@ -181,12 +168,64 @@ def transaction():
                 
                 # Update new money amount
                 db.execute("UPDATE users SET money = ? WHERE id = ?", new_total, session["user_id"])
+
+                # Add to history table
+                tz_NY = timezone('America/New_York')
+                db.execute(
+                    "INSERT INTO history (owner_id, item_type, bucket, amt, new_balance, date, time) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                    session["user_id"],
+                    "Deposit",
+                    "Basic Needs",
+                    money,
+                    new_total,
+                    datetime.now(tz_NY).strftime("%m/%d/%y"),
+                    datetime.now(tz_NY).strftime("%I:%M %p")
+                )
+
+                # Update display of user balance
+                file = open("static/data.json", "w")
+                username = db.execute("SELECT username FROM users WHERE id = ?", session["user_id"])[0]["username"]
+                money = db.execute("SELECT money FROM users WHERE id = ?", session["user_id"])[0]["money"]
+                file.write(f"{username.capitalize()}, {usd(money)}")
+                
+                print('history added')
                 return redirect("/transaction")
             else:
-                flash("Value must be integer or decimals only")
+                flash("Value must be integer or decimals only", "error_one")
                 return redirect("/transaction")
 
-            # format(number, ".2f")  
+        elif request.form.get("submit-transaction-btn"):
+            if not request.form.get("buckets") or not request.form.get("transaction"):
+                flash("Selecting a bucket and entering an amount is required", "error_three")
+                return redirect("/transaction")
+            
+            if not is_float(request.form.get("transaction")):
+                flash("Value must be integer or decimals only", "error_one")
+                return redirect("/transaction")
+            
+            # Add to history table
+            tz_NY = timezone('America/New_York')
+            current = db.execute("SELECT money FROM users WHERE id = ?", session["user_id"])[0]["money"]
+            new_balance = float(current) - float(request.form.get("transaction"))
+            db.execute(
+                "INSERT INTO history (owner_id, item_type, bucket, amt, new_balance, date, time) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                session["user_id"],
+                request.form.get("type"),
+                request.form.get("buckets"),
+                request.form.get("transaction"),
+                format(new_balance, ".2f"),
+                datetime.now(tz_NY).strftime("%m/%d/%y"),
+                datetime.now(tz_NY).strftime("%I:%M %p")
+            )
+
+            db.execute("UPDATE users SET money = ? WHERE id = ?", new_balance, session["user_id"])
+
+            file = open("static/data.json", "w")
+            username = db.execute("SELECT username FROM users WHERE id = ?", session["user_id"])[0]["username"]
+            file.write(f"{username.capitalize()}, {usd(new_balance)}")
+
+            return redirect("/transaction")
+
         return render_template("transaction.html")
     else:
         existing = db.execute("SELECT * FROM buckets WHERE owner_id = ?", session["user_id"])
@@ -194,6 +233,15 @@ def transaction():
             return render_template("transaction.html", existing=existing)
 
         return render_template("transaction.html")
+
+@app.route("/history")
+@login_required
+def history():
+    transactions = db.execute(
+        "SELECT * FROM history WHERE owner_id = ?", session["user_id"]
+    )
+
+    return render_template("history.html", transactions=transactions, usd=usd)
 
 
 @app.route("/api/data")
@@ -209,18 +257,6 @@ def logout():
 
     return redirect("/")
 
-# For developmental purposes
-def shutdown_server():
-    func = request.environ.get('werkzeug.server.shutdown')
-    if func is None:
-        raise RuntimeError('Not running with the Werkzeug Server')
-    func()
-
-@app.route("/quit", methods=['GET','POST'])
-def shutdown():
-    shutdown_server()
-    return 'Server shutting down...'
-
 # Credits
 # https://flask.palletsprojects.com/en/1.1.x/patterns/viewdecorators/
 # https://docs.python.org/3.3/library/functions.html#zip
@@ -234,6 +270,7 @@ def shutdown():
 # https://stackoverflow.com/questions/58793101/unable-to-import-flask-login
     # LESSON: Make sure you have installed the version of Flask-Login which is compatible with your Python Version. 
     # If you're using Python 3 in your Flask App you need pip3 to install compatible parts.
+# https://stackoverflow.com/questions/33948966/flashing-2-groups-of-messages-in-2-different-places-using-flask
 
 # To use later
 # https://stackoverflow.com/questions/24922831/flask-display-user-register-or-already-login-in-every-template-of-each-module
