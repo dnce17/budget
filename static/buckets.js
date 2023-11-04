@@ -54,6 +54,8 @@ saveBtn.addEventListener('click', (e) => {
     let bucketInputs = document.querySelectorAll('.bucket-input');
     let allocations = document.querySelectorAll('.allocation');
     let bucketNames = document.querySelectorAll('.bucket-name');
+    let forUse = document.querySelectorAll('.for-use');
+    let balance = document.querySelector('.balance-amt');
 
     // Remove the get started message
     let getStarted = document.querySelector('.get-started');
@@ -113,6 +115,14 @@ saveBtn.addEventListener('click', (e) => {
         console.log('chart updated');
     }
 
+    // Update the money available for use
+    for (let i = 0; i < allocations.length; i++) {
+        // Removes , and $ to get the float
+        let extractedFloat = parseFloat(balance.textContent.substring(1).replace(",", ""));
+
+        let available = (allocations[i].value / 100) * extractedFloat;
+        forUse[i].value = "$" + available.toFixed(2);
+    }
 });
 
 editBtn.addEventListener('click', (e) => {
@@ -128,7 +138,7 @@ addBtn.addEventListener('click', (e) => {
     e.preventDefault();
     let bucketBody = document.querySelector('.bucket-body');
     let row = document.createElement('tr');
-    row.innerHTML = '<td><input class="bucket-input bucket-name" type="text" name="bucket" placeholder="Enter bucket name"></td><td><input class="bucket-input allocation" type="number" name="allocation" placeholder="Desired % allocation"></td><td class="no-border"><input class="delete" type="hidden" value="-"></td>'
+    row.innerHTML = '<td><input class="bucket-input bucket-name" type="text" name="bucket" placeholder="Enter bucket name"></td><td><input class="bucket-input allocation" type="number" name="allocation" placeholder="Desired % allocation"></td><td><input class="for-use saved" type="text" name="for-use" placeholder="--" readonly></td><td class="no-border"><input class="delete" type="hidden" value="-"></td>'
     bucketBody.appendChild(row);
 });
 

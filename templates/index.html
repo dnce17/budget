@@ -18,6 +18,7 @@
 				<tr>
 					<th>Desired Buckets</th>
 					<th>% Allocation</th>
+					<th>Available For Use</th>
 				</tr>
 			</thead>
 			<tbody class="bucket-body">
@@ -26,6 +27,7 @@
 						<tr>
 							<td><input class="bucket-input bucket-name saved existing" type="text" name="bucket" placeholder="Enter bucket name" value="{{ bucket.name }}" readonly></td>
 							<td><input class="bucket-input allocation saved existing" type="number" name="allocation" placeholder="Desired % allocation" value="{{ bucket.percent_allocation }}" readonly></td>
+							<td><input class="for-use saved" type="text" name="for-use" placeholder="--" value="{{ usd((bucket.percent_allocation / 100) * money) }}" readonly></td>
 							<td class="no-border"><input class="delete" type="hidden" value="-"></td>
 						</tr> 
 					{% endfor%}
@@ -33,23 +35,21 @@
 					<tr>
 						<td><input class="bucket-input bucket-name saved" type="text" name="bucket" placeholder="Enter bucket name" value="Basic Needs" readonly></td>
 						<td><input class="bucket-input allocation saved" type="number" name="allocation" placeholder="Desired % allocation" value="20" readonly></td>
+						<td><input class="for-use saved" type="text" name="for-use" placeholder="--" readonly></td>
 						<td class="no-border"><input class="delete" type="hidden" value="-"></td>
 					</tr> 
 					<tr>
 						<td><input class="bucket-input bucket-name saved" type="text" name="bucket" placeholder="Enter bucket name" value="Investment Account" readonly></td>
 						<td><input class="bucket-input allocation saved" type="number" name="allocation" placeholder="Desired % allocation" value="70" readonly></td>
+						<td><input class="for-use saved" type="text" name="for-use" placeholder="--" readonly></td>
 						<td class="no-border"><input class="delete" type="hidden" value="-"></td>
 					</tr>
 					<tr>
 						<td><input class="bucket-input bucket-name saved" type="text" name="bucket" placeholder="Enter bucket name" value="Fun" readonly></td>
 						<td><input class="bucket-input allocation saved" type="number" name="allocation" placeholder="Desired % allocation" value="10" readonly></td>
+						<td><input class="for-use saved" type="text" name="for-use" placeholder="--" readonly></td>
 						<td class="no-border"><input class="delete" type="hidden" value="-"></td>
 					</tr>
-					<!-- <tr>
-						<td><input class="bucket-input bucket-name" type="text" name="bucket" placeholder="Enter bucket name"></td>
-						<td><input class="bucket-input allocation" type="number" name="allocation" placeholder="Desired % allocation"></td>
-						<td class="no-border"><input class="delete" type="hidden" value="-"></td>
-					</tr> -->
 				{% endif %}
 			</tbody>
 		</table>

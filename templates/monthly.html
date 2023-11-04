@@ -18,55 +18,45 @@
 				<tr>
 					<th>Buckets</th>
 					<th>Desired Spending Limit per Month</th>
+					<th>Max Limit (From % Allocations)</th>
+					<th>Amt Left for this Month</th>
 				</tr>
 			</thead>
 			<tbody class="bucket-body">
 				{% if existing %}
 					{% for bucket in existing %}
 						<tr>
-							<td><input class="bucket-input bucket-name saved existing" type="text" name="bucket" placeholder="Enter bucket name" value="{{ bucket.name }}" readonly></td>
-							<td><input class="bucket-input limit saved existing" type="number" name="limit" placeholder="--" readonly></td>
-						</tr> 
+							<td><input class="bucket-input bucket-name saved existing" type="text" name="bucket" value="{{ bucket.name }}" readonly></td>
+							<td><input class="bucket-input limit saved existing" type="number" name="limit" placeholder="--" value="{{ bucket.month_limit }}"></td>
+							<td><input class="allocation saved" type="text" name="allocation" placeholder="--" value="{{ usd((bucket.percent_allocation / 100) * money) }}" readonly></td>
+							<td><input class="remaining saved" type="text" name="remaining" placeholder="--" readonly></td>
+						</tr>
 					{% endfor%}
 				{% endif %}
 			</tbody>
 		</table>
-		<div class="first-layer-btns">
-			<button class="bucket-btn edit-btn">Edit</button>
-		</div>
-		<div class="second-layer-btns d-none">
-			<button class="bucket-btn save-btn">Save</button>
-			<button class="bucket-btn cancel-btn">Cancel</button>
-		</div>
+		{% if existing %}
+			<div class="first-layer-btns">
+				<button class="bucket-btn edit-btn">Edit</button>
+			</div>
+			<div class="second-layer-btns d-none">
+				<input class="bucket-btn save-btn" name="save" type="submit" value="Save">
+				<button class="bucket-btn cancel-btn">Cancel</button>
+			</div>
+		{% endif %}
 	</form>
 </div>
-<!-- <div class="transaction-ctnr">
-	<form action="/monthly" method="post" class="bucket-form d-inline-block">
-		<select name="buckets" class="transaction">
-			<option value="buckets" disabled selected>-Select a Bucket-</option>
-				{% for bucket in existing %}
-					<option value="{{ bucket.name }}">{{ bucket.name }}</option>
-				{% endfor%}
-		</select>
-		<div class="type-ctnr d-inline-block">
-			<input class="type" type="text" name="type" placeholder="Item Type">
-			<div class="position-relative d-inline-block position-relative">
-				<span class="tooltip-icon d-inline-block" 
-				data-tooltip='Item type as in grocery, clothes, toys, lunch, etc. Try to be general and consistent with them;
-				for example, if you have already used "clothes" as a type, stick with that instead of saying "pants" next time.
-				Another example is sticking with "dinner" rather than specifying "hamburger" or "ribs."'>?
-				</span>
-			</div>
-		</div>
-		<div class="inner-transaction-ctnr d-inline-block">
-			<span>$</span>
-			<input class="transaction" type="number" name="transaction" placeholder="--">
-		</div>
-		<button class="bucket-btn submit-btn">Submit</button>
-	</form>
-</div> -->
 {% endblock %}
 
 {% block js %}
 	<script src="static/monthly.js"></script>
 {% endblock %}
+
+
+<!-- show the % alloation if they exist (aka the user has established them)
+show how much money they have left for the month in the specific buckets, subtracting the amt
+based on the history
+	get the month (e.g 10), then get all transactions with same month in history
+	EXCLUDE money added to bank account within the month (we not gonna count it as extra spending money)
+Show those fancy bucket chart that shows how much money they have for each bucket left -->
+

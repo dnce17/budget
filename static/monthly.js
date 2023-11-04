@@ -9,34 +9,33 @@ let layerTwoBtns = document.querySelector('.second-layer-btns');
 let monthLimit = document.querySelectorAll('.limit');
 
 saveBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    let bucketInputs = document.querySelectorAll('.bucket-input');
-    let bucketNames = document.querySelectorAll('.bucket-name');
+    // e.preventDefault();
+    // let bucketInputs = document.querySelectorAll('.bucket-input');
+    // let limits = document.querySelectorAll('.limit');
 
-    // Remove the get started message
-    let getStarted = document.querySelector('.get-started');
-    if (!getStarted.textContent == '') {
-        getStarted.textContent = '';
-    }
+    // // Check if total of all month limit exceed balance
+    // let total = 0;
+    // for (let i = 0; i < limits.length; i++) {
+    //     total += parseFloat(limits[i].value);
+    // }
+    // console.log(total);
 
-    // Check that month limit does not exceed balance
-    // monthLimit.forEach((amt) => {
-    //     if (monthLimit.value )
-    // });
-    if (total < 100 || total > 100) {
-        saveBtn.setCustomValidity('% must equal to 100');
-        saveBtn.reportValidity();
-        return;
-    }
+    // let itemNum = 0, data = {};
+    // for (let i = 0; i < bucketInputs.length; i+=2) {
+    //     data["item" + String(itemNum)] = [bucketInputs[i].value, bucketInputs[i + 1].value];
+    //     itemNum++;
+    // }
+
+    // console.log(data);
+
 
     // Send JS data to Python Flask Server
-    sendToServer(data)
+    // sendToServer(data)
 
     // Remove ability to change input
-    layerOneBtns.classList.toggle('d-none');
-    layerTwoBtns.classList.toggle('d-none');
-    toggleBucketInputs(bucketInputs, true);
-
+    // layerOneBtns.classList.toggle('d-none');
+    // layerTwoBtns.classList.toggle('d-none');
+    // toggleBucketInputs(bucketInputs, true);
 });
 
 editBtn.addEventListener('click', (e) => {

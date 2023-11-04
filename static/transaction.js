@@ -9,3 +9,7 @@ inputs.forEach((input) => {
         }
     })
 });
+
+// Credit
+// https://stackoverflow.com/questions/41259253/how-to-round-down-number-2-decimal-places
+// https://sabe.io/blog/javascript-get-substring-after-specific-character

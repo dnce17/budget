@@ -63,22 +63,34 @@ def index():
         # Load user's categories and % allocation, if exist
         existing = db.execute("SELECT * FROM buckets WHERE owner_id = ?", session["user_id"])
         if existing:
-            return render_template("index.html", existing=existing, username=username, balance=usd(money))
+            return render_template("index.html", existing=existing, username=username, balance=usd(money), money=money, usd=usd)
 
-        return render_template("index.html", username=username)
+        return render_template("index.html", username=username, balance=usd(money))
     
 # COME BACK TO LATER 
 @app.route("/monthly", methods=["GET", "POST"])
 @login_required
 def monthly():
     if request.method == "POST":
-        print("POST")
+        if request.form.get("save"):
+            buckets = request.form.getlist("bucket")
+            limits = request.form.getlist("limit")
+
+            for bucket, val in zip(buckets, limits):
+                print(bucket, val)
+                db.execute("UPDATE buckets SET month_limit = ? WHERE name = ?", 
+                    val,
+                    bucket
+                )
+
         return redirect("/monthly")
 
     else:
         existing = db.execute("SELECT * FROM buckets WHERE owner_id = ?", session["user_id"])
+        money = db.execute("SELECT money FROM users WHERE id = ?", session["user_id"])[0]["money"]
         if existing:
-            return render_template("monthly.html", existing=existing)
+            # REMOVE money and usd, might not be needed
+            return render_template("monthly.html", existing=existing, money=money, usd=usd)
 
         return render_template("monthly.html")
     
