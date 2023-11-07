@@ -27,9 +27,20 @@
 					{% for bucket in existing %}
 						<tr>
 							<td><input class="bucket-input bucket-name saved existing" type="text" name="bucket" value="{{ bucket.name }}" readonly></td>
-							<td><input class="bucket-input limit saved existing" type="number" name="limit" placeholder="--" value="{{ bucket.month_limit }}"></td>
+							{% if bucket.month_limit %}
+								<td><input class="bucket-input limit saved existing" type="number" name="limit" placeholder="--" value="{{ bucket.month_limit }}"></td>
+							{% else %}
+								<td><input class="bucket-input limit saved existing" type="number" name="limit" placeholder="--"></td>
+							{% endif %}
 							<td><input class="allocation saved" type="text" name="allocation" placeholder="--" value="{{ usd((bucket.percent_allocation / 100) * money) }}" readonly></td>
-							<td><input class="remaining saved" type="text" name="remaining" placeholder="--" readonly></td>
+							<!-- <td><input class="remaining saved" type="text" name="remaining" placeholder="--" readonly></td> -->
+							{% if bucket.month_limit and expenses[bucket.name][0] %}
+								<td><input class="remaining saved" type="text" name="remaining" value="{{ bucket.month_limit - expenses[bucket.name][0] }}" readonly></td>
+							{% elif bucket.month_limit %}
+								<td><input class="remaining saved" type="text" name="remaining" value="{{ bucket.month_limit }}" readonly></td>
+							{% else %}
+								<td><input class="remaining saved" type="text" name="remaining" placeholder="--" readonly></td>
+							{% endif %}
 						</tr>
 					{% endfor%}
 				{% endif %}

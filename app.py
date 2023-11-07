@@ -51,12 +51,27 @@ def index():
                     data[bucket][0], 
                     data[bucket][1]
                 )
+            # existing = db.execute("SELECT * FROM buckets WHERE owner_id = ?", session["user_id"])
+            # if existing:
+            #     for bucket in data:
+            #         db.execute("UPDATE buckets SET name = ?, percent_allocation = ? WHERE owner_id = ?", 
+            #             data[bucket][0],
+            #             data[bucket][1],
+            #             session["user_id"]
+            #         )
+            # else:
+            #     for bucket in data:
+            #         db.execute("INSERT INTO buckets (owner_id, name, percent_allocation) VALUES (?, ?, ?)", 
+            #             session["user_id"],
+            #             data[bucket][0], 
+            #             data[bucket][1]
+            #         )
 
         print("data received and bucket updated")
 
         return redirect("/")
     else:
-        # Load username
+        # Load username and balance
         username = db.execute("SELECT username FROM users WHERE id = ?", session["user_id"])[0]["username"].capitalize()
         money = db.execute("SELECT money FROM users WHERE id = ?", session["user_id"])[0]["money"]
 
@@ -72,25 +87,51 @@ def index():
 @login_required
 def monthly():
     if request.method == "POST":
-        if request.form.get("save"):
-            buckets = request.form.getlist("bucket")
-            limits = request.form.getlist("limit")
+        # if request.form.get("save"):
+        #     buckets = request.form.getlist("bucket")
+        #     limits = request.form.getlist("limit")
 
-            for bucket, val in zip(buckets, limits):
-                print(bucket, val)
-                db.execute("UPDATE buckets SET month_limit = ? WHERE name = ?", 
-                    val,
-                    bucket
+        #     for bucket, val in zip(buckets, limits):
+        #         print(bucket, val)
+        #         db.execute("UPDATE buckets SET month_limit = ? WHERE name = ?", 
+        #             val,
+        #             bucket
+        #         )
+        
+        data = request.get_json(silent=True)
+        if data is not None:
+            for bucket in data:
+                db.execute("UPDATE buckets SET month_limit = ? WHERE name = ? and owner_id = ?",
+                    data[bucket][1], 
+                    data[bucket][0],
+                    session["user_id"]
                 )
 
         return redirect("/monthly")
 
     else:
         existing = db.execute("SELECT * FROM buckets WHERE owner_id = ?", session["user_id"])
-        money = db.execute("SELECT money FROM users WHERE id = ?", session["user_id"])[0]["money"]
+        money = db.execute("SELECT money FROM users WHERE id = ?", session["user_id"])[0]["money"] 
         if existing:
+            # Adjust amt left for month based on history - CHECKPOINT
+            transactions = db.execute("SELECT * FROM history WHERE owner_id = ?", session["user_id"])
+            current_month = datetime.now().strftime("%m")
+            
+            # print(transactions)
+            expenses = {}
+            for bucket in existing:
+                expenses[bucket["name"]] = []
+            for transaction in transactions:
+                if transaction["item_type"] != "Deposit" and transaction["bucket"] in expenses:
+                    # expenses[transaction["bucket"]].append(transaction["amt"])]
+                    if len(expenses[transaction["bucket"]]) > 0:
+                        expenses[transaction["bucket"]][0] += transaction["amt"]
+                    else:
+                        expenses[transaction["bucket"]].append(transaction["amt"])
+            print(expenses)
+
             # REMOVE money and usd, might not be needed
-            return render_template("monthly.html", existing=existing, money=money, usd=usd)
+            return render_template("monthly.html", existing=existing, money=money, usd=usd, expenses=expenses)
 
         return render_template("monthly.html")
     
@@ -249,10 +290,7 @@ def transaction():
 @app.route("/history")
 @login_required
 def history():
-    transactions = db.execute(
-        "SELECT * FROM history WHERE owner_id = ?", session["user_id"]
-    )
-
+    transactions = db.execute("SELECT * FROM history WHERE owner_id = ?", session["user_id"])
     return render_template("history.html", transactions=transactions, usd=usd)
 
 

@@ -86,7 +86,7 @@ saveBtn.addEventListener('click', (e) => {
     }
 
     // Send JS data to Python Flask Server
-    sendToServer(data)
+    sendToServer("/", data)
 
     // Remove ability to change input
     layerOneBtns.classList.toggle('d-none');
@@ -118,7 +118,8 @@ saveBtn.addEventListener('click', (e) => {
     // Update the money available for use
     for (let i = 0; i < allocations.length; i++) {
         // Removes , and $ to get the float
-        let extractedFloat = parseFloat(balance.textContent.substring(1).replace(",", ""));
+        // let extractedFloat = parseFloat(balance.textContent.substring(1).replace(",", ""));
+        let extractedFloat = dollarToFloat(balance.textContent);
 
         let available = (allocations[i].value / 100) * extractedFloat;
         forUse[i].value = "$" + available.toFixed(2);

@@ -12,9 +12,9 @@ function isFilled(inputs) {
 }
 
 // NOTE: This activates the request.method == POST
-function sendToServer(dataToSend) {
+function sendToServer(destination, dataToSend) {
     $.ajax({
-        url: '/',
+        url: destination,
         type: 'POST',
         contentType: 'application/json',
         data: JSON.stringify(dataToSend)
@@ -73,7 +73,7 @@ function makeChart(labelNames, labelAllocations, chartCanvas) {
 
 function displayNameMoney() {
     let username = document.querySelector('.username');
-    let balance = document.querySelector('.balance');
+    let balance = document.querySelector('.balance-amt');
 
     fetch('/api/data')
         .then(res => res.json())
@@ -82,6 +82,10 @@ function displayNameMoney() {
             let name = arr[0], money = arr[1];
             
             username.textContent = name;
-            balance.textContent += money;
+            balance.textContent = money;
         });
+}
+
+function dollarToFloat(amt) {
+    return parseFloat(amt.substring(1).replace(",", ""));
 }
