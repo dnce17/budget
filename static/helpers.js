@@ -89,3 +89,66 @@ function displayNameMoney() {
 function dollarToFloat(amt) {
     return parseFloat(amt.substring(1).replace(",", ""));
 }
+
+function makeDoughnutChart(bucketNames, remainingMoney, monthLimit, chartCtnr, historyJSON) {
+    for (let i = 0; i < remainingMoney.length; i++) {
+        remainingMoney[i].value = monthLimit[i].value;
+        for (let key in historyJSON) {
+            if (historyJSON[key].length > 0 && key == bucketNames[i].value) {
+                console.log(historyJSON[key][0]);
+                // Adjust money left for month based on history
+                remainingMoney[i].value = monthLimit[i].value - historyJSON[key][0];
+            }
+        }
+        console.log("remainingMoney loop finished")
+    }
+     
+    for (let i = 0; i < bucketNames.length; i++) {
+        let canvas = document.createElement('canvas');
+        canvas.classList.add('chart');
+        chartCtnr.appendChild(canvas);
+    }
+    
+    const chartCanvas = document.querySelectorAll('.chart');
+    for (let i = 0; i < chartCanvas.length; i++) {
+        let chart = new Chart(chartCanvas[i], {
+            type: 'doughnut',
+            data: {
+                datasets: [{
+                label: 'My First Dataset',
+                    data: [remainingMoney[i].value, monthLimit[i].value - remainingMoney[i].value],
+                    backgroundColor: [
+                        'rgb(54, 162, 235)',
+                        'aliceblue',
+                    ],
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: bucketNames[i].value,
+                        font: {
+                            size: '15'
+                        },
+                        position: 'bottom',
+                    },
+                    doughnutLabel: {
+                        labels: [
+                            {
+                                text: `${Math.round((remainingMoney[i].value / monthLimit[i].value) * 100)}%`,
+                                font: {
+                                    size: '20'
+                                },
+                                color: 'grey'
+                            },
+                        ]
+                    }
+                }
+            },
+        });
+        console.log('chart made');
+    }
+}

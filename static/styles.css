@@ -78,6 +78,20 @@
     text-align: center;
 }
 
+.chart {
+    width: 192px !important;
+    height: 192px !important;
+    margin: 0 auto;
+}
+
+.donut-chart-ctnr {
+    max-width: 70vw;
+    background-color: #F3CB6F;
+    border-radius: 0.5rem;
+    margin: 0 auto;
+}
+
+
 /* .type-ctnr {
     border: 1px solid red;
 } */

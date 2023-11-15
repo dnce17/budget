@@ -99,6 +99,7 @@ def monthly():
         #         )
         
         data = request.get_json(silent=True)
+        print(data)
         if data is not None:
             for bucket in data:
                 db.execute("UPDATE buckets SET month_limit = ? WHERE name = ? and owner_id = ?",
@@ -112,24 +113,29 @@ def monthly():
     else:
         existing = db.execute("SELECT * FROM buckets WHERE owner_id = ?", session["user_id"])
         money = db.execute("SELECT money FROM users WHERE id = ?", session["user_id"])[0]["money"] 
-        if existing:
-            # Adjust amt left for month based on history - CHECKPOINT
-            transactions = db.execute("SELECT * FROM history WHERE owner_id = ?", session["user_id"])
-            current_month = datetime.now().strftime("%m")
-            
-            # print(transactions)
-            expenses = {}
-            for bucket in existing:
-                expenses[bucket["name"]] = []
-            for transaction in transactions:
-                if transaction["item_type"] != "Deposit" and transaction["bucket"] in expenses:
-                    # expenses[transaction["bucket"]].append(transaction["amt"])]
-                    if len(expenses[transaction["bucket"]]) > 0:
-                        expenses[transaction["bucket"]][0] += transaction["amt"]
-                    else:
-                        expenses[transaction["bucket"]].append(transaction["amt"])
-            print(expenses)
 
+        # Adjust amt left for month based on history - CHECKPOINT
+        transactions = db.execute("SELECT * FROM history WHERE owner_id = ?", session["user_id"])
+        current_month = datetime.now().strftime("%m")
+        
+        # print(transactions)
+        expenses = {}
+        for bucket in existing:
+            expenses[bucket["name"]] = []
+        for transaction in transactions:
+            if transaction["item_type"] != "Deposit" and transaction["bucket"] in expenses:
+                # expenses[transaction["bucket"]].append(transaction["amt"])]
+                if len(expenses[transaction["bucket"]]) > 0:
+                    expenses[transaction["bucket"]][0] += transaction["amt"]
+                else:
+                    expenses[transaction["bucket"]].append(transaction["amt"])
+        print(expenses)
+
+        # Load history into JSON file for use
+        with open('static/history.json', 'w') as file:
+            json.dump(expenses, file)
+        
+        if existing:
             # REMOVE money and usd, might not be needed
             return render_template("monthly.html", existing=existing, money=money, usd=usd, expenses=expenses)
 
@@ -297,6 +303,11 @@ def history():
 @app.route("/api/data")
 def send_data():
     file = open("static/data.json", "r")
+    return(jsonify(file.read()))
+
+@app.route("/api/history")
+def get_history():
+    file = open("static/history.json", "r")
     return(jsonify(file.read()))
 
 
