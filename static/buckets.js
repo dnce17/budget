@@ -40,6 +40,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 allocations.push(existingData[i].value);
             }
         }
+
+        // Remove % to allow calculations
+        for (let i = 0; i < allocations.length; i++) {
+            allocations[i] = allocations[i].replace('%', '');
+        }
     
         chart = makeChart(bucketNames, allocations, chartCanvas);
     }
@@ -56,6 +61,12 @@ saveBtn.addEventListener('click', (e) => {
     let bucketNames = document.querySelectorAll('.bucket-name');
     let forUse = document.querySelectorAll('.for-use');
     let balance = document.querySelector('.balance-amt');
+
+    // Remove % to allow calculations
+    // for (let i = 0; i < allocations.length; i++) {
+    //     allocations[i].value = allocations[i].value.replace('%', '');
+    //     // console.log(allocations[i].value);
+    // }
 
     // Remove the get started message
     let getStarted = document.querySelector('.get-started');
@@ -124,11 +135,23 @@ saveBtn.addEventListener('click', (e) => {
         let available = (allocations[i].value / 100) * extractedFloat;
         forUse[i].value = "$" + available.toFixed(2);
     }
+
+    // Add back % sign after input is done (Must be last or error occur)
+    for (let i = 0; i < allocations.length; i++) {
+        allocations[i].value = allocations[i].value + '%';
+    }
 });
 
 editBtn.addEventListener('click', (e) => {
     e.preventDefault();
     let bucketInputs = document.querySelectorAll('.bucket-input');
+
+    let allocations = document.querySelectorAll('.allocation');
+    
+    for (let i = 0; i < allocations.length; i++) {
+        allocations[i].value = allocations[i].value.replace('%', '');
+        // console.log(allocations[i].value);
+    }
 
     layerOneBtns.classList.toggle('d-none');
     layerTwoBtns.classList.toggle('d-none');

@@ -26,7 +26,7 @@
 					{% for bucket in existing %}
 						<tr>
 							<td><input class="bucket-input bucket-name saved existing" type="text" name="bucket" placeholder="Enter bucket name" value="{{ bucket.name }}" readonly></td>
-							<td><input class="bucket-input allocation saved existing" type="number" name="allocation" placeholder="Desired % allocation" value="{{ bucket.percent_allocation }}" readonly></td>
+							<td><input class="bucket-input allocation saved existing" type="text" inputmode="numeric" name="allocation" placeholder="Desired % allocation" value="{{ bucket.percent_allocation }}%" readonly></td>
 							<td><input class="for-use saved" type="text" name="for-use" placeholder="--" value="{{ usd((bucket.percent_allocation / 100) * money) }}" readonly></td>
 							<td class="no-border"><input class="delete" type="hidden" value="-"></td>
 						</tr> 

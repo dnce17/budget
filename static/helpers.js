@@ -117,10 +117,11 @@ function makeDoughnutChart(bucketNames, remainingMoney, monthLimit, chartCtnr, h
                 datasets: [{
                 label: 'My First Dataset',
                     data: [remainingMoney[i].value, monthLimit[i].value - remainingMoney[i].value],
-                    backgroundColor: [
-                        'rgb(54, 162, 235)',
-                        'aliceblue',
-                    ],
+                    // backgroundColor: [
+                    //     'rgb(54, 162, 235)',
+                    //     'aliceblue',
+                    // ],
+                    backgroundColor: (remainingMoney[i].value > 0) ? ['rgb(54, 162, 235)', 'aliceblue'] : ['white'],
                     hoverOffset: 4
                 }]
             },
