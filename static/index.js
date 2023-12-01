@@ -13,6 +13,9 @@ const chartCtnr = document.querySelector('.chart-ctnr');
 const chartCanvas = document.querySelector('.pie-chart');
 let chart;
 
+let numInputs = document.querySelectorAll('.int-only');
+intOnly(numInputs);
+
 document.addEventListener("DOMContentLoaded", () => {
     let bucketInputs = document.querySelectorAll('.bucket-input');
 
@@ -133,7 +136,8 @@ saveBtn.addEventListener('click', (e) => {
         let extractedFloat = dollarToFloat(balance.textContent);
 
         let available = (allocations[i].value / 100) * extractedFloat;
-        forUse[i].value = "$" + available.toFixed(2);
+        forUse[i].value = dollarFormat(available);
+        // forUse[i].value = "$" + available.toFixed(2);
     }
 
     // Add back % sign after input is done (Must be last or error occur)
@@ -145,7 +149,6 @@ saveBtn.addEventListener('click', (e) => {
 editBtn.addEventListener('click', (e) => {
     e.preventDefault();
     let bucketInputs = document.querySelectorAll('.bucket-input');
-
     let allocations = document.querySelectorAll('.allocation');
     
     for (let i = 0; i < allocations.length; i++) {

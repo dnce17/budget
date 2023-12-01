@@ -26,7 +26,7 @@
 					{% for bucket in existing %}
 						<tr>
 							<td><input class="bucket-input bucket-name saved existing" type="text" name="bucket" placeholder="Enter bucket name" value="{{ bucket.name }}" readonly></td>
-							<td><input class="bucket-input allocation saved existing" type="text" inputmode="numeric" name="allocation" placeholder="Desired % allocation" value="{{ bucket.percent_allocation }}%" readonly></td>
+							<td><input class="bucket-input allocation saved existing int-only" type="text" inputmode="numeric" name="allocation" placeholder="Desired % allocation" value="{{ bucket.percent_allocation }}%" readonly></td>
 							<td><input class="for-use saved" type="text" name="for-use" placeholder="--" value="{{ usd((bucket.percent_allocation / 100) * money) }}" readonly></td>
 							<td class="no-border"><input class="delete" type="hidden" value="-"></td>
 						</tr> 
@@ -34,19 +34,19 @@
 				{% else %}
 					<tr>
 						<td><input class="bucket-input bucket-name saved" type="text" name="bucket" placeholder="Enter bucket name" value="Basic Needs" readonly></td>
-						<td><input class="bucket-input allocation saved" type="number" name="allocation" placeholder="Desired % allocation" value="20" readonly></td>
+						<td><input class="bucket-input allocation saved" type="text" inputmode="numeric" name="allocation" placeholder="Desired % allocation" value="20" readonly></td>
 						<td><input class="for-use saved" type="text" name="for-use" placeholder="--" readonly></td>
 						<td class="no-border"><input class="delete" type="hidden" value="-"></td>
 					</tr> 
 					<tr>
 						<td><input class="bucket-input bucket-name saved" type="text" name="bucket" placeholder="Enter bucket name" value="Investment Account" readonly></td>
-						<td><input class="bucket-input allocation saved" type="number" name="allocation" placeholder="Desired % allocation" value="70" readonly></td>
+						<td><input class="bucket-input allocation saved" type="text" inputmode="numeric" name="allocation" placeholder="Desired % allocation" value="70" readonly></td>
 						<td><input class="for-use saved" type="text" name="for-use" placeholder="--" readonly></td>
 						<td class="no-border"><input class="delete" type="hidden" value="-"></td>
 					</tr>
 					<tr>
 						<td><input class="bucket-input bucket-name saved" type="text" name="bucket" placeholder="Enter bucket name" value="Fun" readonly></td>
-						<td><input class="bucket-input allocation saved" type="number" name="allocation" placeholder="Desired % allocation" value="10" readonly></td>
+						<td><input class="bucket-input allocation saved" type="text" inputmode="numeric" name="allocation" placeholder="Desired % allocation" value="10" readonly></td>
 						<td><input class="for-use saved" type="text" name="for-use" placeholder="--" readonly></td>
 						<td class="no-border"><input class="delete" type="hidden" value="-"></td>
 					</tr>
@@ -78,7 +78,7 @@
 {% endblock %}
 
 {% block js %}
-	<script src="static/buckets.js"></script>
+	<script src="static/index.js"></script>
 {% endblock %}
 
 <!-- LESSONS -->

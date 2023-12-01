@@ -11,6 +11,9 @@ let balance = document.querySelector('.balance-amt');
 
 let form = document.querySelector('.bucket-form');
 
+let numInputs = document.querySelectorAll('.int-only');
+intOnly(numInputs);
+
 // fetch('/api/history')
 //     .then(res => res.json())
 //     .then(data => {
@@ -27,21 +30,28 @@ let form = document.querySelector('.bucket-form');
 // getHistory()
 
 document.addEventListener("DOMContentLoaded", () => {
+    console.log('reloaded')
     // Chart component
     const chartCtnr = document.querySelector('.donut-chart-ctnr');
     let remainingMoney = document.querySelectorAll('.remaining');
     let bucketNames = document.querySelectorAll('.bucket-name');
 
+    // let remainingMoneyVals = []
+    // for (let i = 0; i < remainingMoney.length; i++) {
+    //     remainingMoneyVals[i] = remainingMoney[i].value.replace('$', '');
+    // }
+
     let not_existing = 0;
     for (let i = 0; i < remainingMoney.length; i++) {
+        console.log(remainingMoney[i])
         if (!remainingMoney[i].classList.contains('existing')) {
             not_existing++;
-            break;
+            // break;
         }
     }
 
-    if (not_existing == 0) {
-        console.log('chart made with existing data')
+    if (not_existing != bucketNames.length) {
+        // console.log('chart made with existing data')
         // console.log(historyJSON);
 
         // Make doughnut chart
@@ -68,6 +78,11 @@ saveBtn.addEventListener('click', (e) => {
     let remainingMoney = document.querySelectorAll('.remaining');
     let bucketNames = document.querySelectorAll('.bucket-name');
 
+    // let remainingMoneyVals = []
+    // for (let i = 0; i < remainingMoney.length; i++) {
+    //     remainingMoneyVals[i] = remainingMoney[i].value.replace('$', '');
+    // }
+
     // Check if total of all month limit exceed balance
     // let total = 0;
     // for (let i = 0; i < limits.length; i++) {
@@ -83,14 +98,13 @@ saveBtn.addEventListener('click', (e) => {
     // }
 
     // Proceed if all good
+    // Send JS data to Python Flask Server
     let itemNum = 0, data = {};
     for (let i = 0; i < bucketInputs.length; i+=2) {
         data["item" + String(itemNum)] = [bucketInputs[i].value, bucketInputs[i + 1].value];
         itemNum++;
     }
-
-    // Send JS data to Python Flask Server
-    sendToServer("/monthly", data)
+    sendToServer("/monthly", data);
 
     // form.submit();
     
@@ -110,10 +124,10 @@ saveBtn.addEventListener('click', (e) => {
             makeDoughnutChart(bucketNames, remainingMoney, monthLimit, chartCtnr, JSON.parse(historyJSON));
         }
         getHistory();
-        console.log("chart done");
+        // console.log("chart done");
     }
     else {
-        console.log("else");
+        // console.log("else");
         while (chartCtnr.firstChild) {
             chartCtnr.removeChild(chartCtnr.firstChild);
         }
@@ -124,7 +138,7 @@ saveBtn.addEventListener('click', (e) => {
             makeDoughnutChart(bucketNames, remainingMoney, monthLimit, chartCtnr, JSON.parse(historyJSON));
         }
         getHistory();
-        console.log("chart remade");
+        // console.log("chart remade");
     }
     
     
@@ -144,14 +158,35 @@ saveBtn.addEventListener('click', (e) => {
     layerOneBtns.classList.toggle('d-none');
     layerTwoBtns.classList.toggle('d-none');
     toggleBucketInputs(limits, true);
+
+    // Add back $ sign
+    // limits = document.querySelectorAll('.limit');
+    for (let i = 0; i < limits.length; i++) {
+        // console.log(limits[i].value)
+        // console.log(limits[i].value.length)
+        if (limits[i].value.length > 0 && isNaN(limits[i].value) == false) {
+            // console.log("this val is a num");
+            limits[i].value = '$' + limits[i].value;
+        }
+    }
 });
 
 editBtn.addEventListener('click', (e) => {
+    let limits = document.querySelectorAll('.limit');
     e.preventDefault();
 
     layerOneBtns.classList.toggle('d-none');
     layerTwoBtns.classList.toggle('d-none');
     toggleBucketInputs(monthLimit, false);
+
+    for (let i = 0; i < limits.length; i++) {
+        limits[i].value = limits[i].value.replace(',', '');
+    }
+
+    for (let i = 0; i < limits.length; i++) {
+        limits[i].value = limits[i].value.replace('$', '');
+        // console.log(allocations[i].value);
+    }
 });
 
 cancelBtn.addEventListener('click', (e) => {
@@ -164,3 +199,4 @@ cancelBtn.addEventListener('click', (e) => {
 // Credits
 // https://github.com/chartjs/Chart.js/issues/9850 --> fixed issue with chart resizing
 // https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
+// Format to dollar and comma in number in thousands - https://stackoverflow.com/questions/149055/how-to-format-numbers-as-currency-strings

@@ -90,19 +90,65 @@ function dollarToFloat(amt) {
     return parseFloat(amt.substring(1).replace(",", ""));
 }
 
-function makeDoughnutChart(bucketNames, remainingMoney, monthLimit, chartCtnr, historyJSON) {
-    for (let i = 0; i < remainingMoney.length; i++) {
-        remainingMoney[i].value = monthLimit[i].value;
-        for (let key in historyJSON) {
-            if (historyJSON[key].length > 0 && key == bucketNames[i].value) {
-                console.log(historyJSON[key][0]);
-                // Adjust money left for month based on history
-                remainingMoney[i].value = monthLimit[i].value - historyJSON[key][0];
+function intOnly(inputName) {
+    for (let i = 0; i < inputName.length; i++) {
+        inputName[i].addEventListener('keydown', (e) => {
+            if ((isNaN(e.key) || e.key == " ") && e.key !== 'Backspace') {
+                e.preventDefault();
+
+                // Resolves glitch where space adds . and space still works 1x/2x even with restriction (unsure why)
+                inputName[i].value = inputName[i].value.replace('.', '');
+                inputName[i].value = inputName[i].value.replace(' ', '');
             }
+        });
+    }
+}
+
+// Format with $ and comma (as needed in long numbers)
+function dollarFormat(amt) {
+    const formatter = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+    });
+
+    return formatter.format(amt);
+}
+
+// Format with comma for long numbers
+function thousandsFormat(amt) {
+    const formatter = new Intl.NumberFormat('en-US', {
+        style: 'decimal',
+    });
+
+    return formatter.format(amt);
+}
+
+function makeDoughnutChart(bucketNames, remainingMoney, monthLimit, chartCtnr, historyJSON) {
+    // Calculate amt left 
+    for (let i = 0; i < remainingMoney.length; i++) {
+        remainingMoney[i].value = monthLimit[i].value.replace('$', '');
+        if (monthLimit[i].value.length > 0) {
+            for (let key in historyJSON) {
+                if (historyJSON[key].length > 0 && key == bucketNames[i].value) {
+                    // Adjust money left for month based on history
+                    remainingMoney[i].value = monthLimit[i].value.replace('$', '') - historyJSON[key][0];
+
+                    // Format the $ inside - if remaining money is -
+                    // Urary plus operator turns decimal/int str to num
+                    // if (+remainingMoney[i].value < 0) {
+                    //     remainingMoney[i].value = '-$' + remainingMoney[i].value.replace('-', '');
+                    // } 
+                    // else {
+                    //     remainingMoney[i].value = '$' + remainingMoney[i].value;
+                    // }
+                    // remainingMoney[i].value = '$' + remainingMoney[i].value;
+                }
+            }
+            // console.log("remainingMoney loop finished")
         }
-        console.log("remainingMoney loop finished")
     }
      
+    // Add charts equal to which bucket has month limit decided
     for (let i = 0; i < bucketNames.length; i++) {
         let canvas = document.createElement('canvas');
         canvas.classList.add('chart');
@@ -116,12 +162,12 @@ function makeDoughnutChart(bucketNames, remainingMoney, monthLimit, chartCtnr, h
             data: {
                 datasets: [{
                 label: 'My First Dataset',
-                    data: [remainingMoney[i].value, monthLimit[i].value - remainingMoney[i].value],
+                    data: [remainingMoney[i].value.replace('$', ''), monthLimit[i].value.replace('$', '') - remainingMoney[i].value.replace('$', '')],
                     // backgroundColor: [
                     //     'rgb(54, 162, 235)',
                     //     'aliceblue',
                     // ],
-                    backgroundColor: (remainingMoney[i].value > 0) ? ['rgb(54, 162, 235)', 'aliceblue'] : ['white'],
+                    backgroundColor: (remainingMoney[i].value.replace('$', '') > 0) ? ['rgb(54, 162, 235)', 'aliceblue'] : ['white'],
                     hoverOffset: 4
                 }]
             },
@@ -139,7 +185,7 @@ function makeDoughnutChart(bucketNames, remainingMoney, monthLimit, chartCtnr, h
                     doughnutLabel: {
                         labels: [
                             {
-                                text: `${Math.round((remainingMoney[i].value / monthLimit[i].value) * 100)}%`,
+                                text: `${Math.round((remainingMoney[i].value.replace('$', '') / monthLimit[i].value.replace('$', '')) * 100)}%`,
                                 font: {
                                     size: '20'
                                 },
@@ -150,6 +196,29 @@ function makeDoughnutChart(bucketNames, remainingMoney, monthLimit, chartCtnr, h
                 }
             },
         });
-        console.log('chart made');
+        // console.log('chart made');
+    }
+
+    // Format comma into thousands for remaining
+    for (let i = 0; i < remainingMoney.length; i++) {
+        if (+remainingMoney[i].value.length > 0) {
+            if (+remainingMoney[i].value < 0) {
+                remainingMoney[i].value = '-$' + thousandsFormat(remainingMoney[i].value.replace('-', ''));
+            } 
+            else {
+                remainingMoney[i].value = '$' + thousandsFormat(remainingMoney[i].value);
+            }
+        }
+    }
+
+    // Format comma into thousands for month limit
+    for (let i = 0; i < monthLimit.length; i++) {
+        if (+monthLimit[i].value.length > 0) {
+            monthLimit[i].value = '$' + thousandsFormat(monthLimit[i].value.replace('$', ''));
+        }
     }
 }
+
+// Credits
+// Urary operator - https://www.freecodecamp.org/news/how-to-convert-a-string-to-a-number-in-javascript/#:~:text=(quantity))%3B-,How%20to%20convert%20a%20string%20to%20a%20number%20in%20JavaScript,will%20go%20before%20the%20operand.&text=We%20can%20also%20use%20the,into%20a%20floating%20point%20number.
+// Replacing multiple things - https://stackoverflow.com/questions/16576983/replace-multiple-characters-in-one-replace-call
