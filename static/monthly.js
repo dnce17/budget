@@ -7,6 +7,7 @@ let cancelBtn = document.querySelector('.cancel-btn');
 let layerOneBtns = document.querySelector('.first-layer-btns');
 let layerTwoBtns = document.querySelector('.second-layer-btns');
 let monthLimit = document.querySelectorAll('.limit');
+let spending = document.querySelectorAll('.spending');
 let balance = document.querySelector('.balance-amt');
 
 let form = document.querySelector('.bucket-form');
@@ -159,8 +160,7 @@ saveBtn.addEventListener('click', (e) => {
     layerTwoBtns.classList.toggle('d-none');
     toggleBucketInputs(limits, true);
 
-    // Add back $ sign
-    // limits = document.querySelectorAll('.limit');
+    // Add back $ sign for month limit
     for (let i = 0; i < limits.length; i++) {
         // console.log(limits[i].value)
         // console.log(limits[i].value.length)
@@ -169,6 +169,7 @@ saveBtn.addEventListener('click', (e) => {
             limits[i].value = '$' + limits[i].value;
         }
     }
+
 });
 
 editBtn.addEventListener('click', (e) => {

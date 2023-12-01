@@ -147,7 +147,14 @@ function makeDoughnutChart(bucketNames, remainingMoney, monthLimit, chartCtnr, h
             // console.log("remainingMoney loop finished")
         }
     }
-     
+
+    // Calculate total spent
+    for (let i = 0; i < monthLimit.length; i++) {
+        if (monthLimit[i].value.length > 0) {
+            spending[i].value = dollarFormat(monthLimit[i].value.replace(/[$,]/ig, '') - remainingMoney[i].value.replace(/$,/ig, ''));
+        }
+    }
+
     // Add charts equal to which bucket has month limit decided
     for (let i = 0; i < bucketNames.length; i++) {
         let canvas = document.createElement('canvas');
