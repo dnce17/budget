@@ -171,6 +171,9 @@
 .saved:focus {
     outline: none;
 }
+.hidden {
+    display: none;
+}
 
 /* Credit */
 /* https://developer.mozilla.org/en-US/docs/Web/CSS/gap#flex_layout */

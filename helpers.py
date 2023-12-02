@@ -21,3 +21,7 @@ def is_float(val):
 def usd(value):
     """Format value as USD."""
     return f"${value:,.2f}"
+
+def thousands(value):
+    """Format value as USD."""
+    return f"${value:,.0f}"

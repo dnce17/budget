@@ -164,9 +164,21 @@ saveBtn.addEventListener('click', (e) => {
     for (let i = 0; i < limits.length; i++) {
         // console.log(limits[i].value)
         // console.log(limits[i].value.length)
-        if (limits[i].value.length > 0 && isNaN(limits[i].value) == false) {
+
+        // Delete input if just 0
+        if (+limits[i].value == 0) {
+            limits[i].value = '';
+        } 
+        else if (limits[i].value.length > 0 && isNaN(limits[i].value) == false) {
             // console.log("this val is a num");
-            limits[i].value = '$' + limits[i].value;
+            limits[i].value = '$' + thousandsFormat(limits[i].value);
+        }
+    }
+
+    // Making "Spent Thus Far" blank if month limit is deleted/blank
+    for (let i = 0; i < monthLimit.length; i++) {
+        if (!(monthLimit[i].value.length > 0)) {
+            spending[i].value = '--';
         }
     }
 

@@ -8,7 +8,7 @@ import json
 from datetime import datetime
 from pytz import timezone
 
-from helpers import login_required, is_float, usd
+from helpers import login_required, is_float, usd, thousands
 
 app = Flask(__name__)
 app.jinja_env.auto_reload = True
@@ -137,7 +137,13 @@ def monthly():
         
         if existing:
             # REMOVE money and usd, might not be needed
-            return render_template("monthly.html", existing=existing, money=money, usd=usd, expenses=expenses)
+            return render_template("monthly.html", 
+                existing=existing, 
+                money=money, 
+                usd=usd, 
+                expenses=expenses,
+                thousands=thousands, 
+            )
 
         return render_template("monthly.html")
     

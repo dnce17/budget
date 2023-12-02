@@ -165,7 +165,7 @@ addBtn.addEventListener('click', (e) => {
     e.preventDefault();
     let bucketBody = document.querySelector('.bucket-body');
     let row = document.createElement('tr');
-    row.innerHTML = '<td><input class="bucket-input bucket-name" type="text" name="bucket" placeholder="Enter bucket name"></td><td><input class="bucket-input allocation" type="number" name="allocation" placeholder="Desired % allocation"></td><td><input class="for-use saved" type="text" name="for-use" placeholder="--" readonly></td><td class="no-border"><input class="delete" type="hidden" value="-"></td>'
+    row.innerHTML = '<td><input class="bucket-input bucket-name" type="text" name="bucket" placeholder="Enter bucket name"></td><td><input class="bucket-input allocation" type="text" inputmode="numeric" name="allocation" placeholder="Desired % allocation"></td><td><input class="for-use saved" type="text" name="for-use" placeholder="--" readonly></td><td class="no-border"><input class="delete" type="hidden" value="-"></td>'
     bucketBody.appendChild(row);
 });
 
