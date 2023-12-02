@@ -40,34 +40,135 @@ def index():
     if request.method == "POST":
         # Save the data and update the database
         data = request.get_json(silent=True)
+        # THIS HERE IS ALL FUNCTIONAL (THE ORIGINAL) - DON'T DEL 
+        # if data is not None:
+        #     existing = db.execute("SELECT * FROM buckets WHERE owner_id = ?", session["user_id"])
+        #     if existing:
+        #         db.execute("DELETE FROM buckets WHERE owner_id = ?", session["user_id"])
+
+        #     # If bucket name changed, UPDATE the table with the changed name, but don't DELETE
+        #     # Leave it alone otherwise
+        #     is_same = 0
+        #     print("PRINTING")
+        #     print(len(existing))
+        #     for bucket in existing:
+        #         for item in data:
+        #             if data[item][0] == bucket["name"]:
+        #                 is_same += 1
+            
+        #     if is_same == len(existing):
+        #         print("Bucket names have not changed")
+                
+
+        #     for bucket in data:
+        #         db.execute("INSERT INTO buckets (owner_id, name, percent_allocation) VALUES (?, ?, ?)", 
+        #             session["user_id"],
+        #             data[bucket][0], 
+        #             data[bucket][1]
+        #         )
+        
+        # Under construction - UPDATE instead of DELETE
         if data is not None:
             existing = db.execute("SELECT * FROM buckets WHERE owner_id = ?", session["user_id"])
             if existing:
-                db.execute("DELETE FROM buckets WHERE owner_id = ?", session["user_id"])
+                # db.execute("DELETE FROM buckets WHERE owner_id = ?", session["user_id"])
 
-            for bucket in data:
-                db.execute("INSERT INTO buckets (owner_id, name, percent_allocation) VALUES (?, ?, ?)", 
-                    session["user_id"],
-                    data[bucket][0], 
-                    data[bucket][1]
-                )
-            # existing = db.execute("SELECT * FROM buckets WHERE owner_id = ?", session["user_id"])
-            # if existing:
-            #     for bucket in data:
-            #         db.execute("UPDATE buckets SET name = ?, percent_allocation = ? WHERE owner_id = ?", 
-            #             data[bucket][0],
-            #             data[bucket][1],
-            #             session["user_id"]
-            #         )
-            # else:
-            #     for bucket in data:
-            #         db.execute("INSERT INTO buckets (owner_id, name, percent_allocation) VALUES (?, ?, ?)", 
-            #             session["user_id"],
-            #             data[bucket][0], 
-            #             data[bucket][1]
-            #         )
+                # Put old and new bucket names in array
+                existing_buckets, old_allocations = [], []
+                new_buckets, new_allocations = [], []
+                for i in range(len(existing)): 
+                    existing_buckets.append(existing[i]["name"])
+                    old_allocations.append(existing[i]["percent_allocation"])
+                for item in data:
+                    new_buckets.append(data[item][0])
+                    new_allocations.append(int(data[item][1]))
 
-        print("data received and bucket updated")
+                print(old_allocations)
+                print(new_allocations)
+
+                # Compare the new bucket name against the old
+                # Change in table buckets where name = old, changing it to new name and deleting its month limit
+                    # NEW - need to acc for same bucket name, but new percent allocations
+                # Update the bucket name where different (based on index), leaving the rest alone
+                # Need to account for any deleted row and new rows added
+                    # Compare length of old and new 
+                        # If existing data length is less than new data
+                            # for i in range(len(existing_buckets)): 
+                                # if existing_buckets[i] != new_buckets[i] ... 
+                            # New row = set i to equal the index onward where NEW data comes in
+                        # If existing data length is greater than new data
+                            # for i in range(len(new_buckets)): b/c would go out of range if len(existing_buckets)
+                                # if existing_buckets[i] != new_buckets[i] ... 
+                            # Deleted rows = set i to equal the index onward where you should start delete EXISTING data from
+                        # else if same
+                            # 
+
+                def update_bucket_names(existing_buckets, new_buckets, index):
+                    if existing_buckets[index] != new_buckets[index]:
+                        print("bucket name updated")
+                        db.execute("UPDATE buckets SET name = ?,  month_limit = NULL WHERE owner_id = ? AND name = ?", new_buckets[index], session["user_id"], existing_buckets[index])
+                def update_allocations(existing_buckets, new_buckets, old_allocations, new_allocations, index):
+                    if old_allocations[index] != new_allocations[index]:
+                        print('allocation updated')
+                        # Compare new_bucket name in case BOTH the name and allocation changes
+                        db.execute("UPDATE buckets SET percent_allocation = ? WHERE owner_id = ? AND name = ?", new_allocations[index], session["user_id"], new_buckets[index])
+                
+                # Index where new data comes in if new data is longer than existing or where existing data should be deleted if new data is shorter
+                breakpoint = 0
+                if len(existing_buckets) == len(new_buckets):
+                    for i in range(len(existing_buckets)): 
+                        if existing_buckets[i] != new_buckets[i]:
+                            print("bucket name updated")
+                            db.execute("UPDATE buckets SET name = ?,  month_limit = NULL WHERE owner_id = ? AND name = ?", new_buckets[i], session["user_id"], existing_buckets[i])
+                        if old_allocations[i] != new_allocations[i]:
+                            print('allocation updated')
+                            # Compare new_bucket name in case BOTH the name and allocation changes
+                            db.execute("UPDATE buckets SET percent_allocation = ? WHERE owner_id = ? AND name = ?", new_allocations[i], session["user_id"], new_buckets[i])
+                    print("No index needed")
+                elif len(existing_buckets) < len(new_buckets):
+                    for i in range(len(existing_buckets)): 
+                        if existing_buckets[i] != new_buckets[i]:
+                            print("bucket name updated")
+                            db.execute("UPDATE buckets SET name = ?,  month_limit = NULL WHERE owner_id = ? AND name = ?", new_buckets[i], session["user_id"], existing_buckets[i])
+                        if old_allocations[i] != new_allocations[i]:
+                            print('allocation updated')
+                            # Compare new_bucket name in case BOTH the name and allocation changes
+                            db.execute("UPDATE buckets SET percent_allocation = ? WHERE owner_id = ? AND name = ?", new_allocations[i], session["user_id"], new_buckets[i])
+                    # Index onward - NEW data to be INSERT
+                    breakpoint = len(existing_buckets)
+                    print("Index to insert new data: " + str(breakpoint))
+                    for i in range(breakpoint, len(new_buckets)):
+                        db.execute("INSERT INTO buckets (owner_id, name, percent_allocation) VALUES (?, ?, ?)", 
+                            session["user_id"],
+                            new_buckets[i], 
+                            new_allocations[i]
+                        )
+                elif len(existing_buckets) > len(new_buckets):
+                    for i in range(len(new_buckets)):
+                        if existing_buckets[i] != new_buckets[i]:
+                            print("bucket name updated")
+                            db.execute("UPDATE buckets SET name = ?,  month_limit = NULL WHERE owner_id = ? AND name = ?", new_buckets[i], session["user_id"], existing_buckets[i])
+                        if old_allocations[i] != new_allocations[i]:
+                            print('allocation updated')
+                            # Compare new_bucket name in case BOTH the name and allocation changes
+                            db.execute("UPDATE buckets SET percent_allocation = ? WHERE owner_id = ? AND name = ?", new_allocations[i], session["user_id"], new_buckets[i])
+                    # Index onward - Existing data to be deleted
+                    breakpoint = len(new_buckets)
+                    print("Index to delete existing data: " + str(breakpoint))
+                    for i in range(breakpoint, len(existing_buckets)):
+                        db.execute("DELETE FROM buckets WHERE owner_id = ? AND name = ?", 
+                            session["user_id"],
+                            existing_buckets[i]
+                        )
+            else:
+                for bucket in data:
+                    db.execute("INSERT INTO buckets (owner_id, name, percent_allocation) VALUES (?, ?, ?)", 
+                        session["user_id"],
+                        data[bucket][0], 
+                        data[bucket][1]
+                    )
+
+        # print("data received and bucket updated")
 
         return redirect("/")
     else:
