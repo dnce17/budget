@@ -187,7 +187,7 @@ function makeDoughnutChart(bucketNames, remainingMoney, monthLimit, chartCtnr, h
 
     // PSEUDO
     // Only create chart if the value for monthLimit input is > 0
-    console.log(monthLimit);
+    // console.log(monthLimit);
 
     for (let i = 0; i < bucketNames.length; i++) {
         let canvas = document.createElement('canvas');
@@ -203,8 +203,11 @@ function makeDoughnutChart(bucketNames, remainingMoney, monthLimit, chartCtnr, h
                 type: 'doughnut',
                 data: {
                     datasets: [{
-                    label: 'My First Dataset',
-                        data: [remainingMoney[i].value.replace(/[$,]/ig, ''), monthLimit[i].value.replace(/[$,]/ig, '') - remainingMoney[i].value.replace(/[$,]/ig, '')],
+                        // label: 'My First Dataset',
+                        // data: [remainingMoney[i].value.replace(/[$,]/ig, ''), monthLimit[i].value.replace(/[$,]/ig, '') - remainingMoney[i].value.replace(/[$,]/ig, '')],
+                        data: (remainingMoney[i].value.replace(/[$,]/ig, '') > 0) 
+                                ? [remainingMoney[i].value.replace(/[$,]/ig, ''), monthLimit[i].value.replace(/[$,]/ig, '') - remainingMoney[i].value.replace(/[$,]/ig, '')] 
+                                : [remainingMoney[i].value.replace(/[$,]/ig, '')],
                         // backgroundColor: [
                         //     'rgb(54, 162, 235)',
                         //     'aliceblue',
@@ -234,6 +237,26 @@ function makeDoughnutChart(bucketNames, remainingMoney, monthLimit, chartCtnr, h
                                     color: 'grey'
                                 },
                             ]
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: context => {
+                                    console.log(context);
+                                    if (context.dataIndex == 0) {
+                                        if (context.dataset.data[context.dataIndex] > 0) {
+                                            console.log(context.dataset.data[context.dataIndex]);
+                                            return 'Left for Month: ' + dollarFormat(context.dataset.data[context.dataIndex]);
+                                        }
+                                        else {
+                                            console.log(context.dataset.data[context.dataIndex]);
+                                            return 'Amt Over Limit: -' + dollarFormat(context.dataset.data[context.dataIndex].replace('-', ''));
+                                        }
+                                    }
+                                    else if (context.dataIndex == 1) {
+                                        return 'Spent Thus Far: ' + dollarFormat(context.dataset.data[context.dataIndex]);
+                                    }
+                                }
+                            }
                         }
                     }
                 },
@@ -253,17 +276,17 @@ function makeDoughnutChart(bucketNames, remainingMoney, monthLimit, chartCtnr, h
     // Format comma into thousands for remaining
     for (let i = 0; i < remainingMoney.length; i++) {
         if (!(+monthLimit[i].value.length > 0)) {
-            console.log("nothing")
+            // console.log("nothing")
             remainingMoney[i].value = '--';
         }
 
         if (+remainingMoney[i].value.length > 0) {
             if (+remainingMoney[i].value < 0) {
-                console.log(remainingMoney[i].value)
+                // console.log(remainingMoney[i].value)
                 remainingMoney[i].value = '-' + dollarFormat(remainingMoney[i].value.replace('-', ''));
             } 
             else if (remainingMoney[i].value > 0) {
-                console.log(remainingMoney[i].value)
+                // console.log(remainingMoney[i].value)
                 remainingMoney[i].value = dollarFormat(remainingMoney[i].value);
             }
         }
