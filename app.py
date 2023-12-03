@@ -151,19 +151,8 @@ def index():
 @login_required
 def monthly():
     if request.method == "POST":
-        # if request.form.get("save"):
-        #     buckets = request.form.getlist("bucket")
-        #     limits = request.form.getlist("limit")
-
-        #     for bucket, val in zip(buckets, limits):
-        #         print(bucket, val)
-        #         db.execute("UPDATE buckets SET month_limit = ? WHERE name = ?", 
-        #             val,
-        #             bucket
-        #         )
-        
         data = request.get_json(silent=True)
-        print(data)
+        # print(data)
         if data is not None:
             for bucket in data:
                 db.execute("UPDATE buckets SET month_limit = ? WHERE name = ? and owner_id = ?",
@@ -181,19 +170,23 @@ def monthly():
         # Adjust amt left for month based on history - CHECKPOINT
         transactions = db.execute("SELECT * FROM history WHERE owner_id = ?", session["user_id"])
         current_month = datetime.now().strftime("%m")
+        current_yr = datetime.now().strftime("%y")
         
         # print(transactions)
         expenses = {}
         for bucket in existing:
             expenses[bucket["name"]] = []
         for transaction in transactions:
-            if transaction["item_type"] != "Deposit" and transaction["bucket"] in expenses:
-                # expenses[transaction["bucket"]].append(transaction["amt"])]
+            m = transaction["date"][:2]
+            y = transaction["date"][-2:]
+            print(m, y)
+            # print(transaction["date"][-2:])
+            if transaction["item_type"] != "Deposit" and transaction["bucket"] in expenses and m == current_month and y == current_yr:
                 if len(expenses[transaction["bucket"]]) > 0:
                     expenses[transaction["bucket"]][0] += transaction["amt"]
                 else:
                     expenses[transaction["bucket"]].append(transaction["amt"])
-        print(expenses)
+        # print(expenses)
 
         # Load history into JSON file for use
         with open('static/history.json', 'w') as file:
@@ -344,7 +337,7 @@ def transaction():
                 request.form.get("transaction"),
                 format(new_balance, ".2f"),
                 datetime.now(tz_NY).strftime("%m/%d/%y"),
-                # datetime.now(tz_NY).strftime("04/25/22"),
+                # datetime.now(tz_NY).strftime("10/12/22"),
                 datetime.now(tz_NY).strftime("%I:%M %p")
             )
 
@@ -369,18 +362,19 @@ def transaction():
 def history():
     # Reversed = date arranges from latest to oldest
     # transactions = reversed(db.execute("SELECT * FROM history WHERE owner_id = ?", session["user_id"]))
-    transactions = reversed(db.execute("SELECT * FROM history WHERE owner_id = ? ORDER BY date, time ASC", session["user_id"]))
+    transactions = reversed(db.execute("SELECT * FROM history WHERE owner_id = ?", session["user_id"]))
     # print(*transactions, sep='\n')
 
     # FOR LATER: CHANGE so most recent at the top
     dates = db.execute("SELECT date FROM history WHERE owner_id = ?", session["user_id"])
     month_yr_list = []
+    # Reverse so most recent date is at top of dropdown list
+    month_yr_list.reverse()
     for date in dates:
         extracted = datetime.strptime(date["date"], "%m/%d/%y")
         month_yr = f"{extracted.strftime('%b')} {extracted.year}"
         if month_yr not in month_yr_list:
             month_yr_list.append(month_yr)
-    print(month_yr_list)
     return render_template("history.html", transactions=transactions, usd=usd, month_yr_list=month_yr_list)
 
 
