@@ -5,27 +5,36 @@
 {% endblock %}
 
 {% block main %}
-<h1 class="text-center">Transaction History</h1>
-<table class="table">
-    <tr>
-        <th>Bucket</th>
-        <th>Item Type</th>
-        <th>Amount</th>
-        <th>New Balance</th>
-        <th>Date</th>
-        <th>Time</th>
-    </tr>
-        {% for transaction in transactions %}
-            <tr>
-                <td>{{ transaction.bucket }}</td>
-                <td>{{ transaction.item_type }}</td>
-                <td>{{ usd(transaction.amt) }}</td>
-                <td>{{ usd(transaction.new_balance) }}</td>
-                <td>{{ transaction.date }}</td>
-                <td>{{ transaction.time }}</td>
-            </tr>
+<div class="d-flex flex-column align-items-center">
+    <h1 class="text-center">Transaction History</h1>
+    <select name="dates" class="text-center dates">
+        <option value="all">All</option>
+        {% for date in month_yr_list %}
+            <option value="{{ date }}">{{ date }}</option>
         {% endfor %}
-</table>
+    </select>
+    <table class="table">
+        <tr>
+            <th>Bucket</th>
+            <th>Item Type</th>
+            <th>Amount</th>
+            <th>New Balance</th>
+            <th>Date</th>
+            <th>Time</th>
+        </tr>
+            {% for transaction in transactions %}
+                <tr class="transaction-row">
+                    <td>{{ transaction.bucket }}</td>
+                    <td>{{ transaction.item_type }}</td>
+                    <td>{{ usd(transaction.amt) }}</td>
+                    <td>{{ usd(transaction.new_balance) }}</td>
+                    <td class="date">{{ transaction.date }}</td>
+                    <td>{{ transaction.time }}</td>
+                </tr>
+            {% endfor %}
+    </table>
+</div>
+
 {% endblock %}
 
 {% block js %}

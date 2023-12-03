@@ -146,7 +146,7 @@ def index():
 
         return render_template("index.html", username=username, balance=usd(money))
     
-# COME BACK TO LATER 
+# CHECKPOINT - for the else - for expenses, EXLUCDE ones that are not of current month
 @app.route("/monthly", methods=["GET", "POST"])
 @login_required
 def monthly():
@@ -344,6 +344,7 @@ def transaction():
                 request.form.get("transaction"),
                 format(new_balance, ".2f"),
                 datetime.now(tz_NY).strftime("%m/%d/%y"),
+                # datetime.now(tz_NY).strftime("04/25/22"),
                 datetime.now(tz_NY).strftime("%I:%M %p")
             )
 
@@ -366,8 +367,21 @@ def transaction():
 @app.route("/history")
 @login_required
 def history():
-    transactions = db.execute("SELECT * FROM history WHERE owner_id = ?", session["user_id"])
-    return render_template("history.html", transactions=transactions, usd=usd)
+    # Reversed = date arranges from latest to oldest
+    # transactions = reversed(db.execute("SELECT * FROM history WHERE owner_id = ?", session["user_id"]))
+    transactions = reversed(db.execute("SELECT * FROM history WHERE owner_id = ? ORDER BY date, time ASC", session["user_id"]))
+    # print(*transactions, sep='\n')
+
+    # FOR LATER: CHANGE so most recent at the top
+    dates = db.execute("SELECT date FROM history WHERE owner_id = ?", session["user_id"])
+    month_yr_list = []
+    for date in dates:
+        extracted = datetime.strptime(date["date"], "%m/%d/%y")
+        month_yr = f"{extracted.strftime('%b')} {extracted.year}"
+        if month_yr not in month_yr_list:
+            month_yr_list.append(month_yr)
+    print(month_yr_list)
+    return render_template("history.html", transactions=transactions, usd=usd, month_yr_list=month_yr_list)
 
 
 @app.route("/api/data")
@@ -402,6 +416,4 @@ def logout():
     # LESSON: Make sure you have installed the version of Flask-Login which is compatible with your Python Version. 
     # If you're using Python 3 in your Flask App you need pip3 to install compatible parts.
 # https://stackoverflow.com/questions/33948966/flashing-2-groups-of-messages-in-2-different-places-using-flask
-
-# To use later
-# https://stackoverflow.com/questions/24922831/flask-display-user-register-or-already-login-in-every-template-of-each-module
+# Convert num month to abbrev month - https://stackoverflow.com/questions/6557553/get-month-name-from-number

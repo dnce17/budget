@@ -141,24 +141,17 @@
 }
 
 /* transaction.html */
-/* .money-ctnr, .transaction-ctnr {
-    margin-top: 2rem;
+.transaction-row td {
+    /* border: 1px solid green; */
+    width: 11rem;
 }
-
-.transaction-form, .wrap-ctnr {
-    margin-top: 2rem;
-} */
-/* 
-.inner-transaction-ctnr {
-    border: 1px solid green;
-} */
-
-/* .transaction-message {
-    margin-top: 2rem;
-} */
 
 .transaction-form .bucket-btn {
     margin-left: 1rem;
+}
+
+.dates {
+    width: 8rem;
 }
 
 /* All HTML use */
