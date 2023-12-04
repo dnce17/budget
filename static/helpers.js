@@ -11,7 +11,7 @@ function isFilled(inputs) {
     return true;
 }
 
-// NOTE: This activates the request.method == POST
+// NOTE: This also activates the request.method == POST
 function sendToServer(destination, dataToSend) {
     $.ajax({
         url: destination,
@@ -52,8 +52,7 @@ function intOnly(inputName) {
 
     for (let i = 0; i < inputName.length; i++) {
         inputName[i].addEventListener('keydown', (e) => {
-            // if ((isNaN(e.key) || e.key == ' ') && e.key !== 'Backspace') {
-                if ((isNaN(e.key) || e.key == ' ') && !workingKeys.includes(e.key)) {
+            if ((isNaN(e.key) || e.key == ' ') && !workingKeys.includes(e.key)) {
                 e.preventDefault();
 
                 // Resolves glitch where space adds . and space still works 1x/2x even with restriction (unsure why)
@@ -84,47 +83,29 @@ function thousandsFormat(amt) {
 }
 
 function makeChart(labelNames, labelAllocations, chartCanvas) {
-     // Create or update pie chart
-    //  let labelNames = [], labelAllocations = [], colorsToUse = [];
     let colorsToUse = [];
-
-     // CHECKPOINT: maybe make it more dynamic?
-     let colors = [
-         'rgb(255, 99, 132)',
-         'rgb(54, 162, 235)',
-         'rgb(255, 205, 86)',
-         'rgb(218, 247, 166)',
-         'rgb(255, 87, 51)',
-         'rgb(88, 24, 69)',
-         'rgb(100, 82, 86)',
-         'rgb(0, 182, 144)',
-         'rgb(0, 0, 255)',
-         'rgb(255, 0, 255)'
-     ]
+    let colors = [
+        'rgb(255, 99, 132)',
+        'rgb(54, 162, 235)',
+        'rgb(255, 205, 86)',
+        'rgb(218, 247, 166)',
+        'rgb(255, 87, 51)',
+        'rgb(88, 24, 69)',
+        'rgb(100, 82, 86)',
+        'rgb(0, 182, 144)',
+        'rgb(0, 0, 255)',
+        'rgb(255, 0, 255)'
+    ]
  
-    //  bucketNames.forEach((name) => {
-    //      labelNames.push(name.value);
-    //  })
-    //  allocations.forEach((allocation) => {
-    //      labelAllocations.push(allocation.value);
-    //  })
-     for (let i = 0; i < labelNames.length; i++) {
-         colorsToUse.push(colors[i]);
-
-        // Add val to rgb if labelNames.length is beyond amt in color array
-        if (i > colors.length) {
-            // Define fixed values to add +25 to for rgb
-            // For each value over colors.length
-        }
-
-     }
+    for (let i = 0; i < labelNames.length; i++) {
+        colorsToUse.push(colors[i]);
+    }
  
-     let chart = new Chart(chartCanvas, {
+    let chart = new Chart(chartCanvas, {
          type: 'pie',
          data: {
              labels: labelNames,
              datasets: [{
-                 // label: 'Money Buckets and Allocations',
                  data: labelAllocations,
                  backgroundColor: colorsToUse,
                  hoverOffset: 4
@@ -135,17 +116,15 @@ function makeChart(labelNames, labelAllocations, chartCanvas) {
                 tooltip: {
                     callbacks: {
                         label: context => {
-                            // console.log(context);
                             return context.dataset.data[context.dataIndex] + '%';
                         }
                     }
                 }
             }
         }
-         // plugins: [ChartDataLabels]
-     });
+    });
 
-     return chart;
+    return chart;
 }
 
 // NOTE: this function does more than 1 thing = BAD!!
@@ -160,19 +139,8 @@ function makeDoughnutChart(bucketNames, remainingMoney, monthLimit, chartCtnr, h
                 if (historyJSON[key].length > 0 && key == bucketNames[i].value) {
                     // Adjust money left for month based on history
                     remainingMoney[i].value = monthLimit[i].value.replace(/[$,]/ig, '') - historyJSON[key][0];
-
-                    // Format the $ inside - if remaining money is -
-                    // Urary plus operator turns decimal/int str to num
-                    // if (+remainingMoney[i].value < 0) {
-                    //     remainingMoney[i].value = '-$' + remainingMoney[i].value.replace('-', '');
-                    // } 
-                    // else {
-                    //     remainingMoney[i].value = '$' + remainingMoney[i].value;
-                    // }
-                    // remainingMoney[i].value = '$' + remainingMoney[i].value;
                 }
             }
-            // console.log("remainingMoney loop finished")
         }
     }
 
@@ -184,18 +152,12 @@ function makeDoughnutChart(bucketNames, remainingMoney, monthLimit, chartCtnr, h
     }
 
     // Add charts equal to which bucket has month limit decided
-
-    // PSEUDO
-    // Only create chart if the value for monthLimit input is > 0
-    // console.log(monthLimit);
-
     for (let i = 0; i < bucketNames.length; i++) {
         let canvas = document.createElement('canvas');
         canvas.classList.add('chart');
         chartCtnr.appendChild(canvas);
     }
 
-    // Don't create charts based on amt of charts, but total bucketNames b/c [i] will be mixed up
     const chartCanvas = document.querySelectorAll('.chart');
     for (let i = 0; i < monthLimit.length; i++) {
         if (monthLimit[i].value.length > 0) {
@@ -203,15 +165,9 @@ function makeDoughnutChart(bucketNames, remainingMoney, monthLimit, chartCtnr, h
                 type: 'doughnut',
                 data: {
                     datasets: [{
-                        // label: 'My First Dataset',
-                        // data: [remainingMoney[i].value.replace(/[$,]/ig, ''), monthLimit[i].value.replace(/[$,]/ig, '') - remainingMoney[i].value.replace(/[$,]/ig, '')],
                         data: (remainingMoney[i].value.replace(/[$,]/ig, '') > 0) 
                                 ? [remainingMoney[i].value.replace(/[$,]/ig, ''), monthLimit[i].value.replace(/[$,]/ig, '') - remainingMoney[i].value.replace(/[$,]/ig, '')] 
                                 : [remainingMoney[i].value.replace(/[$,]/ig, '')],
-                        // backgroundColor: [
-                        //     'rgb(54, 162, 235)',
-                        //     'aliceblue',
-                        // ],
                         backgroundColor: (remainingMoney[i].value.replace(/[$,]/ig, '') > 0) ? ['rgb(54, 162, 235)', 'aliceblue'] : ['white'],
                         hoverOffset: 4
                     }]
@@ -241,14 +197,11 @@ function makeDoughnutChart(bucketNames, remainingMoney, monthLimit, chartCtnr, h
                         tooltip: {
                             callbacks: {
                                 label: context => {
-                                    console.log(context);
                                     if (context.dataIndex == 0) {
                                         if (context.dataset.data[context.dataIndex] > 0) {
-                                            console.log(context.dataset.data[context.dataIndex]);
                                             return 'Left for Month: ' + dollarFormat(context.dataset.data[context.dataIndex]);
                                         }
                                         else {
-                                            console.log(context.dataset.data[context.dataIndex]);
                                             return 'Amt Over Limit: -' + dollarFormat(context.dataset.data[context.dataIndex].replace('-', ''));
                                         }
                                     }
@@ -262,13 +215,11 @@ function makeDoughnutChart(bucketNames, remainingMoney, monthLimit, chartCtnr, h
                 },
             });   
         }
-        // console.log('chart made');
     }
 
-    // Hide the charts that do not have a width/height
+    // Hide the canvas that do not have a width/height (aka don't have chart made)
     for (let i = 0; i < chartCanvas.length; i++) {
         if (chartCanvas[i].style.width == '') {
-            console.log('no width');
             chartCanvas[i].classList.add('hidden');
         }
     }
@@ -276,28 +227,18 @@ function makeDoughnutChart(bucketNames, remainingMoney, monthLimit, chartCtnr, h
     // Format comma into thousands for remaining
     for (let i = 0; i < remainingMoney.length; i++) {
         if (!(+monthLimit[i].value.length > 0)) {
-            // console.log("nothing")
             remainingMoney[i].value = '--';
         }
 
         if (+remainingMoney[i].value.length > 0) {
             if (+remainingMoney[i].value < 0) {
-                // console.log(remainingMoney[i].value)
                 remainingMoney[i].value = '-' + dollarFormat(remainingMoney[i].value.replace('-', ''));
             } 
             else if (remainingMoney[i].value > 0) {
-                // console.log(remainingMoney[i].value)
                 remainingMoney[i].value = dollarFormat(remainingMoney[i].value);
             }
         }
     }
-
-    // Format comma into thousands for month limit
-    // for (let i = 0; i < monthLimit.length; i++) {
-    //     if (+monthLimit[i].value.length > 0) {
-    //         monthLimit[i].value = '$' + thousandsFormat(monthLimit[i].value.replace('$', ''));
-    //     }
-    // }
 }
 
 // Credits

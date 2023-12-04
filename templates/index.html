@@ -16,7 +16,15 @@
 		<table class="table bucket-table">
 			<thead class="bucket-head">
 				<tr>
-					<th>Desired Buckets</th>
+					<th>
+						Desired Buckets
+						<div class="position-relative d-inline-block position-relative">
+							<span class="tooltip-icon d-inline-block" 
+							data-tooltip='CAUTION: If you have transactions in your history already, changing the bucket names 
+							will cause issues with monthly budget calculations if they do not match the names shown in history'>?
+							</span>
+						</div>
+					</th>
 					<th>% Allocation</th>
 					<th>Available For Use</th>
 				</tr>
@@ -68,7 +76,6 @@
 	</form>
 </div>
 <div class="chart-ctnr d-flex">
-	<!-- <canvas class="pie-chart"></canvas> -->
 	{% if existing %}
 		<canvas class="pie-chart made"></canvas>
 	{% else %}
@@ -80,7 +87,3 @@
 {% block js %}
 	<script src="static/index.js"></script>
 {% endblock %}
-
-<!-- LESSONS -->
-<!-- In order for request.form.get to work, the input must be directly within form tag -->
-<!-- form MUST be the parent, not grandparent or anything else -->

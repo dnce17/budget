@@ -27,11 +27,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    // Check if previous data (bucket name + allocation) exist for user
     if (not_existing == 0) {
         console.log('chart made with existing data')
-
-        // Don't perform below code if no previous user bucket data exist
-    
         let existingData = document.querySelectorAll('.existing');
         let bucketNames = [], allocations = [];
     
@@ -65,13 +63,7 @@ saveBtn.addEventListener('click', (e) => {
     let forUse = document.querySelectorAll('.for-use');
     let balance = document.querySelector('.balance-amt');
 
-    // Remove % to allow calculations
-    // for (let i = 0; i < allocations.length; i++) {
-    //     allocations[i].value = allocations[i].value.replace('%', '');
-    //     // console.log(allocations[i].value);
-    // }
-
-    // Remove the get started message
+    // Remove "get started" message
     let getStarted = document.querySelector('.get-started');
     if (!getStarted.textContent == '') {
         getStarted.textContent = '';
@@ -132,15 +124,13 @@ saveBtn.addEventListener('click', (e) => {
     // Update the money available for use
     for (let i = 0; i < allocations.length; i++) {
         // Removes , and $ to get the float
-        // let extractedFloat = parseFloat(balance.textContent.substring(1).replace(",", ""));
         let extractedFloat = dollarToFloat(balance.textContent);
 
         let available = (allocations[i].value / 100) * extractedFloat;
         forUse[i].value = dollarFormat(available);
-        // forUse[i].value = "$" + available.toFixed(2);
     }
 
-    // Add back % sign after input is done (Must be last or error occur)
+    // Add back % sign after input is done (Must be last or else error occur)
     for (let i = 0; i < allocations.length; i++) {
         allocations[i].value = allocations[i].value + '%';
     }
@@ -153,7 +143,6 @@ editBtn.addEventListener('click', (e) => {
     
     for (let i = 0; i < allocations.length; i++) {
         allocations[i].value = allocations[i].value.replace('%', '');
-        // console.log(allocations[i].value);
     }
 
     layerOneBtns.classList.toggle('d-none');
@@ -166,7 +155,7 @@ addBtn.addEventListener('click', (e) => {
     let bucketBody = document.querySelector('.bucket-body');
     let row = document.createElement('tr');
 
-    // Max rows = 10
+    // Max rows set to 10
     if (bucketBody.children.length < 10) {
         row.innerHTML = '<td><input class="bucket-input bucket-name" type="text" name="bucket" placeholder="Enter bucket name"></td><td><input class="bucket-input allocation" type="text" inputmode="numeric" name="allocation" placeholder="Desired % allocation"></td><td><input class="for-use saved" type="text" name="for-use" placeholder="--" readonly></td><td class="no-border"><input class="delete" type="hidden" value="-"></td>'   
         bucketBody.appendChild(row);
@@ -211,7 +200,7 @@ backBtn.addEventListener('click', (e) => {
 
 
 // NOTE to self
-// preventDefault also changes the value of "this" also
+    // preventDefault also changes the value of "this" also
 
 // Credit
 // https://chartjs-plugin-datalabels.netlify.app/guide/labels.html#multiple-labels

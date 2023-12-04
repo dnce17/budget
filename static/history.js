@@ -3,9 +3,7 @@ displayNameMoney();
 let dates = document.querySelector('.dates');
 
 dates.addEventListener('change', () => {
-    // console.log(dates.value);
-
-    // Get the date = e.g. Dec 2023
+    // Get the date (e.g. Dec 2023)
     if (dates.value.toLowerCase() == "all") {
         let rows = document.querySelectorAll('.transaction-row');
         for (let i = 0; i < rows.length; i++) {
@@ -21,17 +19,13 @@ dates.addEventListener('change', () => {
         let month = date.getMonth() + 1;
         let yr = parseInt(String(date.getFullYear()).slice(-2));
 
-        // console.log(month, yr);
-
-        // display: none all of the rows that do not match the desired filter
-        
         let displayedDate = document.querySelectorAll('.date');
         for (let i = 0; i < displayedDate.length; i++) {
+            // Extract the numerical month and 2-digit yr from mm/dd/yy
             let m = displayedDate[i].textContent.slice(0, 2);
             let y = displayedDate[i].textContent.slice(-2);
-            // console.log(m, y)
+            // Hide all rows that do not match desired filter
             if (m != month || y != yr) {
-                console.log(displayedDate[i].textContent);
                 displayedDate[i].parentElement.classList.add('hidden');
             }
             else {
@@ -39,8 +33,6 @@ dates.addEventListener('change', () => {
                     displayedDate[i].parentElement.classList.remove('hidden');
                 }
             }
-            // console.log(displayedDate[i].parentElement);
         }
     }
-    
 });
