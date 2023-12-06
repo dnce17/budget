@@ -5,19 +5,21 @@
 {% endblock %}
 
 {% block main %}
-<div class="bucket-ctnr text-center">
-	<h1>Monthly Budget</h1>
-	<h3 class="get-started">
-		{% if not existing %}
-			You don't have any money buckets made. Click <a href="/">here</a> to get started! 
-		{% endif %}
-	</h3>
+<div class="bucket-ctnr ctnr text-center shadow d-flex flex-column align-items-center">
+	<div class="header bucket-header">
+		<h1>Monthly Budget</h1>
+		<h3 class="get-started">
+			{% if not existing %}
+				You don't have any money buckets made. Click <a href="/">here</a> to get started! 
+			{% endif %}
+		</h3>
+	</div>
 	<form action="/monthly" method="post" class="bucket-form d-inline-block">
 		<table class="table bucket-table">
 			<thead class="bucket-head">
 				<tr class="col-headers">
 					<th>Buckets</th>
-					<th>Desired Spending Limit per Month</th>
+					<th>Spending Limit per Month</th>
 					<th>Spent Thus Far</th>
 					<th>Amt Left for this Month</th>
 				</tr>
@@ -44,6 +46,11 @@
 							{% endif %}
 						</tr>
 					{% endfor%}
+				{% else %}
+					<td><input class="bucket-input bucket-name saved" type="text" name="bucket" placeholder="--" readonly></td>
+					<td><input class="bucket-input limit saved int-only" type="text" inputmode="numeric" name="limit" placeholder="--"></td>
+					<td><input class="spending saved" type="text" name="spending" placeholder="--" readonly></td>
+					<td><input class="remaining saved" type="text" name="remaining" placeholder="--" readonly></td>
 				{% endif %}
 			</tbody>
 		</table>
@@ -58,7 +65,7 @@
 		{% endif %}
 	</form>
 </div>
-<div class="donut-chart-ctnr d-flex flex-wrap"></div>
+<div class="donut-chart-ctnr shadow d-flex flex-wrap"></div>
 {% endblock %}
 
 {% block js %}

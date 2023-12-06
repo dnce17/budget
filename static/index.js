@@ -157,7 +157,15 @@ addBtn.addEventListener('click', (e) => {
 
     // Max rows set to 10
     if (bucketBody.children.length < 10) {
-        row.innerHTML = '<td><input class="bucket-input bucket-name" type="text" name="bucket" placeholder="Enter bucket name"></td><td><input class="bucket-input allocation" type="text" inputmode="numeric" name="allocation" placeholder="Desired % allocation"></td><td><input class="for-use saved" type="text" name="for-use" placeholder="--" readonly></td><td class="no-border"><input class="delete" type="hidden" value="-"></td>'   
+        row.innerHTML = 
+        '<td><input class="bucket-input bucket-name" type="text" name="bucket" placeholder="Enter bucket name"></td>' +
+        '<td><input class="bucket-input allocation" type="text" inputmode="numeric" name="allocation" placeholder="Desired % allocation"></td>' +
+        '<td>' +
+            '<input class="for-use saved" type="text" name="for-use" placeholder="--" readonly>' +
+            '<span class="no-border delete-ctnr hidden">' +
+                '<input class="delete" type="button" value="-">' +
+            '</span>' +
+        '</td>'   
         bucketBody.appendChild(row);
     }
     else {
@@ -175,11 +183,16 @@ cancelBtn.addEventListener('click', (e) => {
 showDeleteBtn.addEventListener('click', (e) => {
     e.preventDefault();
     let deleteBtns = document.querySelectorAll('.delete');
+    let deleteCtnr = document.querySelectorAll('.delete-ctnr');
+
     deleteBtns.forEach((del) => {
-        del.type = "button";
         del.addEventListener('click', () => {
-            del.parentElement.parentElement.remove();
+            del.parentElement.parentElement.parentElement.remove();
         });
+    });
+
+    deleteCtnr.forEach((del) => {
+        del.classList.remove('hidden');
     });
 
     layerTwoBtns.classList.toggle('d-none');
@@ -188,10 +201,10 @@ showDeleteBtn.addEventListener('click', (e) => {
 
 backBtn.addEventListener('click', (e) => {
     e.preventDefault();
-    let deleteBtns = document.querySelectorAll('.delete');
+    let deleteCtnr = document.querySelectorAll('.delete-ctnr');
 
-    deleteBtns.forEach((del) => {
-        del.type = "hidden";
+    deleteCtnr.forEach((del) => {
+        del.classList.add('hidden');
     });
 
     layerTwoBtns.classList.toggle('d-none');

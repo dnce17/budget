@@ -119,7 +119,15 @@ function makeChart(labelNames, labelAllocations, chartCanvas) {
                             return context.dataset.data[context.dataIndex] + '%';
                         }
                     }
+                },
+                legend: {
+                    labels: {
+                        color: 'black'
+                    }
                 }
+            },
+            layout: {
+                padding: 10
             }
         }
     });

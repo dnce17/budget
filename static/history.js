@@ -1,6 +1,7 @@
 displayNameMoney();
 
 let dates = document.querySelector('.dates');
+let row = document.querySelectorAll('.transaction-row');
 
 dates.addEventListener('change', () => {
     // Get the date (e.g. Dec 2023)

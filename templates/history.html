@@ -5,15 +5,17 @@
 {% endblock %}
 
 {% block main %}
-<div class="d-flex flex-column align-items-center">
-    <h1 class="text-center">Transaction History</h1>
-    <select name="dates" class="text-center dates">
-        <option value="all">All</option>
-        {% for date in month_yr_list %}
-            <option value="{{ date }}">{{ date }}</option>
-        {% endfor %}
-    </select>
-    <table class="table">
+<div class="d-flex flex-column align-items-center history-ctnr ctnr shadow">
+    <div class="header history-header d-flex flex-column align-items-center">
+        <h1 class="text-center">Transaction History</h1>
+        <select name="dates" class="text-center dates">
+            <option value="all">All</option>
+            {% for date in month_yr_list %}
+                <option value="{{ date }}">{{ date }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <table class="table history-table">
         <tr>
             <th>Bucket</th>
             <th>Item Type</th>
@@ -22,6 +24,7 @@
             <th>Date</th>
             <th>Time</th>
         </tr>
+        {% if transactions | length > 0 %}
             {% for transaction in transactions %}
                 <tr class="transaction-row">
                     <td>{{ transaction.bucket }}</td>
@@ -32,6 +35,16 @@
                     <td>{{ transaction.time }}</td>
                 </tr>
             {% endfor %}
+        {% else %}
+                <tr class="transaction-row">
+                    <td>--</td>
+                    <td>--</td>
+                    <td>--</td>
+                    <td>--</td>
+                    <td>--</td>
+                    <td>--</td>
+                </tr>
+        {% endif %}
     </table>
 </div>
 

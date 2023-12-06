@@ -12,6 +12,7 @@ from helpers import login_required, is_float, usd, thousands
 
 app = Flask(__name__)
 app.jinja_env.auto_reload = True
+socketio = SocketIO(app)
 
 # Ensure templates are auto-reloaded
 app.config["TEMPLATES_AUTO_RELOAD"] = True
@@ -241,7 +242,7 @@ def transaction():
         if request.form.get("submit-money-btn"):
             money = request.form.get("money")
             if not money:
-                flash("Must type in an amount", "error_two")
+                flash("*Must type in an amount", "error_two")
                 return redirect("/transaction")
 
             if is_float(money):
@@ -273,16 +274,16 @@ def transaction():
                 
                 return redirect("/transaction")
             else:
-                flash("Value must be integer or decimals only", "error_one")
+                flash("*Value must be integer or decimals only", "error_one")
                 return redirect("/transaction")
 
         elif request.form.get("submit-transaction-btn"):
             if not request.form.get("buckets") or not request.form.get("transaction"):
-                flash("Selecting a bucket and entering an amount is required", "error_three")
+                flash("*Selecting a bucket and entering an amount is required", "error_three")
                 return redirect("/transaction")
             
             if not is_float(request.form.get("transaction")):
-                flash("Value must be integer or decimals only", "error_one")
+                flash("*Value must be integer or decimals only", "error_one")
                 return redirect("/transaction")
             
             # Add to history table
@@ -321,17 +322,19 @@ def transaction():
 @login_required
 def history():
     # Reversed to arrange dates from latest to oldest
-    transactions = reversed(db.execute("SELECT * FROM history WHERE owner_id = ?", session["user_id"]))
+    # transactions = reversed(db.execute("SELECT * FROM history WHERE owner_id = ?", session["user_id"]))
+    transactions = db.execute("SELECT * FROM history WHERE owner_id = ?", session["user_id"])
+    transactions.reverse()
 
     dates = db.execute("SELECT date FROM history WHERE owner_id = ?", session["user_id"])
     month_yr_list = []
-    # Reverse to put recent date at top of dropdown list
-    month_yr_list.reverse()
     for date in dates:
         extracted = datetime.strptime(date["date"], "%m/%d/%y")
         month_yr = f"{extracted.strftime('%b')} {extracted.year}"
         if month_yr not in month_yr_list:
             month_yr_list.append(month_yr)
+    # Reverse to put recent date at top of dropdown list
+    month_yr_list.reverse()
     return render_template("history.html", transactions=transactions, usd=usd, month_yr_list=month_yr_list)
 
 
@@ -352,6 +355,7 @@ def logout():
     # Forget any user id
     session.clear()
     return redirect("/")
+    
 
 # Credits
 # https://flask.palletsprojects.com/en/1.1.x/patterns/viewdecorators/
@@ -368,3 +372,6 @@ def logout():
     # If you're using Python 3 in your Flask App you need pip3 to install compatible parts.
 # https://stackoverflow.com/questions/33948966/flashing-2-groups-of-messages-in-2-different-places-using-flask
 # Convert num month to abbrev month - https://stackoverflow.com/questions/6557553/get-month-name-from-number
+
+# May want to consider flasksocket.io cause it does server to client and vice versa (I think)
+# https://stackoverflow.com/questions/42988907/how-do-you-send-messages-from-flask-server-python-to-html-client

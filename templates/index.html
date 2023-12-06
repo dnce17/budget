@@ -5,19 +5,21 @@
 {% endblock %}
 
 {% block main %}
-<div class="bucket-ctnr text-center">
-	<h1>Money Buckets</h1>
-	<h3 class="get-started">
-		{% if not existing %}
-			You don't have any buckets made. Here's an example to get you started!
-		{% endif %}
-	</h3>
+<div class="bucket-ctnr ctnr text-center shadow d-flex flex-column align-items-center">
+	<div class="header bucket-header">
+		<h1 class=>Money Buckets</h1>
+		<h3 class="get-started">
+			{% if not existing %}
+				You don't have any buckets made. Here's an example to get you started!
+			{% endif %}
+		</h3>
+	</div>
 	<form action="/" method="post" class="bucket-form d-inline-block">
 		<table class="table bucket-table">
 			<thead class="bucket-head">
 				<tr>
 					<th>
-						Desired Buckets
+						Buckets
 						<div class="position-relative d-inline-block position-relative">
 							<span class="tooltip-icon d-inline-block" 
 							data-tooltip='CAUTION: If you have transactions in your history already, changing the bucket names 
@@ -35,28 +37,46 @@
 						<tr>
 							<td><input class="bucket-input bucket-name saved existing" type="text" name="bucket" placeholder="Enter bucket name" value="{{ bucket.name }}" readonly></td>
 							<td><input class="bucket-input allocation saved existing int-only" type="text" inputmode="numeric" name="allocation" value="{{ bucket.percent_allocation }}%" readonly></td>
-							<td><input class="for-use saved" type="text" name="for-use" placeholder="--" value="{{ usd((bucket.percent_allocation / 100) * money) }}" readonly></td>
-							<td class="no-border"><input class="delete" type="hidden" value="-"></td>
+							<!-- <td><input class="for-use saved" type="text" name="for-use" placeholder="--" value="{{ usd((bucket.percent_allocation / 100) * money) }}" readonly></td>
+							<td class="no-border delete-ctnr hidden"><input class="delete" type="button" value="-"></td> -->
+							<td>
+								<input class="for-use saved" type="text" name="for-use" placeholder="--" value="{{ usd((bucket.percent_allocation / 100) * money) }}" readonly>
+								<span class="no-border delete-ctnr hidden">
+									<input class="delete" type="button" value="-">
+								</span>
+							</td>
 						</tr> 
 					{% endfor%}
 				{% else %}
 					<tr>
 						<td><input class="bucket-input bucket-name saved" type="text" name="bucket" placeholder="Enter bucket name" value="Basic Needs" readonly></td>
 						<td><input class="bucket-input allocation saved" type="text" inputmode="numeric" name="allocation" value="20%" readonly></td>
-						<td><input class="for-use saved" type="text" name="for-use" placeholder="--" readonly></td>
-						<td class="no-border"><input class="delete" type="hidden" value="-"></td>
+						<td>
+							<input class="for-use saved" type="text" name="for-use" placeholder="--" readonly>
+							<span class="no-border delete-ctnr hidden">
+								<input class="delete" type="button" value="-">
+							</span>
+						</td>
 					</tr> 
 					<tr>
 						<td><input class="bucket-input bucket-name saved" type="text" name="bucket" placeholder="Enter bucket name" value="Investment Account" readonly></td>
 						<td><input class="bucket-input allocation saved" type="text" inputmode="numeric" name="allocation" value="70%" readonly></td>
-						<td><input class="for-use saved" type="text" name="for-use" placeholder="--" readonly></td>
-						<td class="no-border"><input class="delete" type="hidden" value="-"></td>
+						<td>
+							<input class="for-use saved" type="text" name="for-use" placeholder="--" readonly>
+							<span class="no-border delete-ctnr hidden">
+								<input class="delete" type="button" value="-">
+							</span>
+						</td>
 					</tr>
 					<tr>
 						<td><input class="bucket-input bucket-name saved" type="text" name="bucket" placeholder="Enter bucket name" value="Fun" readonly></td>
 						<td><input class="bucket-input allocation saved" type="text" inputmode="numeric" name="allocation" value="10%" readonly></td>
-						<td><input class="for-use saved" type="text" name="for-use" placeholder="--" readonly></td>
-						<td class="no-border"><input class="delete" type="hidden" value="-"></td>
+						<td>
+							<input class="for-use saved" type="text" name="for-use" placeholder="--" readonly>
+							<span class="no-border delete-ctnr hidden">
+								<input class="delete" type="button" value="-">
+							</span>
+						</td>
 					</tr>
 				{% endif %}
 			</tbody>
@@ -77,9 +97,9 @@
 </div>
 <div class="chart-ctnr d-flex">
 	{% if existing %}
-		<canvas class="pie-chart made"></canvas>
+		<canvas class="pie-chart shadow made"></canvas>
 	{% else %}
-		<canvas class="pie-chart"></canvas>
+		<canvas class="pie-chart hidden"></canvas>
 	{% endif %}
 </div>
 {% endblock %}
