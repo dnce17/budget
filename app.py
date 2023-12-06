@@ -12,7 +12,6 @@ from helpers import login_required, is_float, usd, thousands
 
 app = Flask(__name__)
 app.jinja_env.auto_reload = True
-socketio = SocketIO(app)
 
 # Ensure templates are auto-reloaded
 app.config["TEMPLATES_AUTO_RELOAD"] = True
@@ -355,7 +354,7 @@ def logout():
     # Forget any user id
     session.clear()
     return redirect("/")
-    
+
 
 # Credits
 # https://flask.palletsprojects.com/en/1.1.x/patterns/viewdecorators/
