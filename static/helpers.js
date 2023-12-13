@@ -82,6 +82,18 @@ function thousandsFormat(amt) {
     return formatter.format(amt);
 }
 
+function createInput(classArr, inputType, inputVal) {
+    let input = document.createElement('input');
+    for (let className of classArr) {
+        input.classList.add(className);
+    }
+    input.setAttribute('type', inputType);
+    input.setAttribute('value', inputVal);
+    input.readOnly = true;
+
+    return input
+}
+
 function makeChart(labelNames, labelAllocations, chartCanvas) {
     let colorsToUse = [];
     let colors = [
@@ -136,7 +148,7 @@ function makeChart(labelNames, labelAllocations, chartCanvas) {
 }
 
 // NOTE: this function does more than 1 thing = BAD!!
-function makeDoughnutChart(bucketNames, remainingMoney, monthLimit, chartCtnr, historyJSON) {
+function makeDoughnutChart(bucketNames, monthLimit, spending, remainingMoney, chartCtnr, historyJSON) {
     // Calculate amt left 
     for (let i = 0; i < remainingMoney.length; i++) {
         // Start from a clean slate

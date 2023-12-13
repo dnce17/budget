@@ -1,5 +1,11 @@
-displayNameMoney();
+// displayNameMoney();
 
+// TO DO LATER - 1) if user ONLY delete a row from index and nothing else (MAYBE), save the monthly table in budget history
+// b/c monthly table will be of before delete
+    // NOTE: there will likely be other considerations needed
+// Off top of my head, i believe you can just paste monthly code for saving and updating into index
+// 2) formatting in "remaining" column when remaining is exactly 0 
+ 
 let saveBtn = document.querySelector('.save-btn');
 let editBtn = document.querySelector('.edit-btn');
 let cancelBtn = document.querySelector('.cancel-btn');
@@ -11,6 +17,8 @@ let spending = document.querySelectorAll('.spending');
 let balance = document.querySelector('.balance-amt');
 
 let form = document.querySelector('.bucket-form');
+let dates = document.querySelector('.dates');
+
 
 let numInputs = document.querySelectorAll('.int-only');
 intOnly(numInputs);
@@ -34,7 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
         async function getHistory() {
             const response = await fetch("/api/history");
             const historyJSON = await response.json();
-            makeDoughnutChart(bucketNames, remainingMoney, monthLimit, chartCtnr, JSON.parse(historyJSON));
+            makeDoughnutChart(bucketNames, monthLimit, spending, remainingMoney, chartCtnr, JSON.parse(historyJSON));
         }
         getHistory();
     }
@@ -60,13 +68,14 @@ saveBtn.addEventListener('click', (e) => {
         data["item" + String(itemNum)] = [bucketInputs[i].value, bucketInputs[i + 1].value];
         itemNum++;
     }
+    console.log(data)
     sendToServer("/monthly", data);
 
     if (chartCtnr.children.length == 0) {
         async function getHistory() {
             const response = await fetch("/api/history");
             const historyJSON = await response.json();
-            makeDoughnutChart(bucketNames, remainingMoney, monthLimit, chartCtnr, JSON.parse(historyJSON));
+            makeDoughnutChart(bucketNames, monthLimit, spending, remainingMoney, chartCtnr, JSON.parse(historyJSON));
         }
         getHistory();
     }
@@ -78,7 +87,7 @@ saveBtn.addEventListener('click', (e) => {
         async function getHistory() {
             const response = await fetch("/api/history");
             const historyJSON = await response.json();
-            makeDoughnutChart(bucketNames, remainingMoney, monthLimit, chartCtnr, JSON.parse(historyJSON));
+            makeDoughnutChart(bucketNames, monthLimit, spending, remainingMoney, chartCtnr, JSON.parse(historyJSON));
         }
         getHistory();
     }
@@ -108,6 +117,8 @@ saveBtn.addEventListener('click', (e) => {
 
 });
 
+
+// TO ADD: make it only work if the dropdown menu value is current
 editBtn.addEventListener('click', (e) => {
     e.preventDefault();
     let limits = document.querySelectorAll('.limit');
@@ -130,6 +141,89 @@ cancelBtn.addEventListener('click', (e) => {
     // To counteract the reportValidity of isFilled func, if activated
     bucketForm.noValidate = true;
 });
+
+// TEST
+dates.addEventListener('change', (e) => {
+    // console.log(dates.value.split(' '))
+    socket.emit('get budget of date', dates.value.split(' '));
+})
+
+socket.on('get budget of date', function(data) {
+    // console.log(data['expenses']["Basic Needs"][0]);
+    let table = document.querySelector('.bucket-body');
+    let donutCtnr = document.querySelector('.donut-chart-ctnr');
+    let btnsCtnr = document.querySelector('.btns-ctnr');
+
+    // Remove data on table and donut chart
+    while (table.firstChild) {
+        table.removeChild(table.firstChild);
+    }
+    while (donutCtnr.firstChild) {
+        donutCtnr.removeChild(donutCtnr.firstChild);
+    }
+
+    // Determines the amt of rows (NOT amt of columns)
+    for (let bucket of data['past_budget']) {
+        // console.log(bucket)
+        
+        // Arbitrary: say there is 5 rows
+        let tr = document.createElement('tr');
+        let columnAmt = 4;
+        for (let i = 0; i < columnAmt; i++) {
+            // Rows always have 4 columns, so need 4 td
+            let td = document.createElement('td');
+            let input;
+            switch (i) {
+                case 0:
+                    input = createInput(['bucket-input', 'bucket-name', 'saved'], 'text', bucket['bucket_name']);
+                    break;
+                case 1:
+                    input = createInput(['bucket-input', 'limit', 'saved', 'int-only'], 'text', '$' + thousandsFormat(bucket['month_limit']));
+                    break;
+                case 2:
+                    for (let name in data['expenses']) {
+                        if (name == bucket['bucket_name']) {
+                            input = createInput(['spending', 'saved'], 'text', dollarFormat(data['expenses'][name]));
+                            break;
+                        }
+                    }
+                    break;
+                case 3:
+                    for (let name in data['expenses']) {
+                        if (name == bucket['bucket_name']) {
+                            input = createInput(['remaining', 'saved'], 'text', dollarFormat(bucket['month_limit'] - data['expenses'][name]));
+                            break;
+                        }
+                    }
+            }
+            td.appendChild(input);
+            tr.appendChild(td);
+            table.appendChild(tr);
+        }
+        // console.log(tr);
+    }
+
+    // DO LATER: Remove buttons if current data shown is not this month's data
+
+    // Create doughnut chart
+    const chartCtnr = document.querySelector('.donut-chart-ctnr');
+    let bucketNames = document.querySelectorAll('.bucket-name');
+    let remainingMoney = document.querySelectorAll('.remaining');
+    spending = document.querySelectorAll('.spending');
+    monthLimit = document.querySelectorAll('.limit');
+    console.log(chartCtnr);
+    console.log(bucketNames);
+    console.log(remainingMoney);
+    console.log(JSON.stringify(data['expenses']));
+    makeDoughnutChart(bucketNames, monthLimit, spending, remainingMoney, chartCtnr, JSON.parse(JSON.stringify(data['expenses'])));
+    
+});
+
+let monthlyCtnr = document.querySelector('.monthly-ctnr');
+console.log(monthlyCtnr);
+// form.appendChild(thisFile);
+// sendToServer("/monthly", data);
+
 
 
 // Credits

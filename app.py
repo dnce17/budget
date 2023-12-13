@@ -7,11 +7,13 @@ from werkzeug.security import check_password_hash, generate_password_hash
 import json
 from datetime import datetime
 from pytz import timezone
+from flask_socketio import SocketIO, emit
 
 from helpers import login_required, is_float, usd, thousands
 
 app = Flask(__name__)
 app.jinja_env.auto_reload = True
+socketio = SocketIO(app)
 
 # Ensure templates are auto-reloaded
 app.config["TEMPLATES_AUTO_RELOAD"] = True
@@ -127,13 +129,54 @@ def index():
 def monthly():
     if request.method == "POST":
         data = request.get_json(silent=True)
+        # print(data)
+
+        # Add to/Update the month_limit 
         if data is not None:
             for bucket in data:
-                db.execute("UPDATE buckets SET month_limit = ? WHERE name = ? and owner_id = ?",
+                db.execute("UPDATE buckets SET month_limit = ? WHERE name = ? AND owner_id = ?",
                     data[bucket][1], 
                     data[bucket][0],
                     session["user_id"]
                 )
+        
+        # Add to or update the budget history
+        if data is not None:
+            current_abbrev_month = datetime.now().strftime("%b")
+            # current_abbrev_month = "Oct"
+            current_full_yr = datetime.now().strftime("%Y")
+            # current_full_yr = 2022
+            recent_history = db.execute("SELECT month, year FROM budget_history WHERE month = ? AND year = ?", current_abbrev_month, current_full_yr)
+            
+            # If history for current month exist, delete it and insert new one 
+            if recent_history:
+                # Delete budget_history for current month
+                db.execute("DELETE FROM budget_history WHERE owner_id = ? AND month = ? AND year = ?", 
+                    session["user_id"], 
+                    current_abbrev_month, 
+                    current_full_yr
+                )
+                # Insert the new one for current month
+                for bucket in data:
+                    db.execute("INSERT INTO budget_history (owner_id, bucket_name, month_limit, month, year) VALUES (?, ?, ?, ?, ?)",
+                        session["user_id"],
+                        data[bucket][0],
+                        data[bucket][1],
+                        current_abbrev_month,
+                        current_full_yr
+                    )
+                print("budget history for this month exist. Old has been deleted and new inserted")
+            # If not, just insert
+            else:
+                for bucket in data:
+                    db.execute("INSERT INTO budget_history (owner_id, bucket_name, month_limit, month, year) VALUES (?, ?, ?, ?, ?)",
+                        session["user_id"],
+                        data[bucket][0],
+                        data[bucket][1],
+                        current_abbrev_month,
+                        current_full_yr
+                    )
+                print("this month's budget doesn't exist, so new budget has been inserted")
 
         return redirect("/monthly")
 
@@ -161,13 +204,23 @@ def monthly():
         # Load history into JSON file for use
         with open('static/history.json', 'w') as file:
             json.dump(expenses, file)
+
+        # Get user's past monthly budget to load into dropdown
+        past_budget = db.execute("SELECT * FROM budget_history WHERE owner_id = ?", session["user_id"])
+        past_dates = []
+        for history in past_budget:
+            date = f"{history['month']} {str(history['year'])}"
+            if date not in past_dates and history['month'] != datetime.now().strftime("%b") and history['year'] != datetime.now().strftime("%Y"): 
+                past_dates.append(f"{history['month']} {str(history['year'])}")
+        print(past_dates)
         
         if existing:
             return render_template("monthly.html", 
                 existing=existing, 
                 usd=usd, 
                 expenses=expenses,
-                thousands=thousands, 
+                thousands=thousands,
+                past_dates=past_dates
             )
 
         return render_template("monthly.html")
@@ -175,10 +228,11 @@ def monthly():
     
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    # session.clear() removes flash msg, so use a var to save it
     if session.get("_flashes"):
         flashes = session.get("_flashes")
         session.clear()
+
+        # session.clear() removes flash msg, so use a var to save it
         session["_flashes"] = flashes
     else:
         session.clear()
@@ -196,6 +250,11 @@ def login():
 
         # Remember which user has logged in
         session["user_id"] = username[0]["id"]
+        
+        # Save username and balance to use for display
+        session["username"] = db.execute("SELECT username FROM users WHERE id = ?", session["user_id"])[0]["username"]
+        session["balance"] = usd(db.execute("SELECT money FROM users WHERE id = ?", session["user_id"])[0]["money"])
+
 
         # Send username + money for JS to display on all pages
         money = db.execute(
@@ -238,6 +297,7 @@ def register():
 @login_required
 def transaction():
     if request.method == "POST":
+        # Add money to balance
         if request.form.get("submit-money-btn"):
             money = request.form.get("money")
             if not money:
@@ -266,16 +326,18 @@ def transaction():
                 )
 
                 # Update display of user balance
-                file = open("static/data.json", "w")
-                username = db.execute("SELECT username FROM users WHERE id = ?", session["user_id"])[0]["username"]
-                money = db.execute("SELECT money FROM users WHERE id = ?", session["user_id"])[0]["money"]
-                file.write(f"{username.capitalize()}, {usd(money)}")
+                session["balance"] = usd(db.execute("SELECT money FROM users WHERE id = ?", session["user_id"])[0]["money"])
+                # OLD
+                # file = open("static/data.json", "w")
+                # username = db.execute("SELECT username FROM users WHERE id = ?", session["user_id"])[0]["username"]
+                # money = db.execute("SELECT money FROM users WHERE id = ?", session["user_id"])[0]["money"]
+                # file.write(f"{username.capitalize()}, {usd(money)}")
                 
                 return redirect("/transaction")
             else:
                 flash("*Value must be integer or decimals only", "error_one")
                 return redirect("/transaction")
-
+        # Submit a transaction (reduce balance)
         elif request.form.get("submit-transaction-btn"):
             if not request.form.get("buckets") or not request.form.get("transaction"):
                 flash("*Selecting a bucket and entering an amount is required", "error_three")
@@ -296,15 +358,18 @@ def transaction():
                 request.form.get("buckets"),
                 request.form.get("transaction"),
                 format(new_balance, ".2f"),
-                datetime.now(tz_NY).strftime("%m/%d/%y"),
-                datetime.now(tz_NY).strftime("%I:%M %p")
+                # datetime.now(tz_NY).strftime("%m/%d/%y"),
+                datetime.now(tz_NY).strftime("10/22/22"),
+                # datetime.now(tz_NY).strftime("%I:%M %p")
+                datetime.now(tz_NY).strftime("12:00 AM")
             )
 
             db.execute("UPDATE users SET money = ? WHERE id = ?", new_balance, session["user_id"])
 
-            file = open("static/data.json", "w")
-            username = db.execute("SELECT username FROM users WHERE id = ?", session["user_id"])[0]["username"]
-            file.write(f"{username.capitalize()}, {usd(new_balance)}")
+            session["balance"] = usd(db.execute("SELECT money FROM users WHERE id = ?", session["user_id"])[0]["money"])
+            # file = open("static/data.json", "w")
+            # username = db.execute("SELECT username FROM users WHERE id = ?", session["user_id"])[0]["username"]
+            # file.write(f"{username.capitalize()}, {usd(new_balance)}")
 
             return redirect("/transaction")
 
@@ -323,7 +388,25 @@ def history():
     # Reversed to arrange dates from latest to oldest
     # transactions = reversed(db.execute("SELECT * FROM history WHERE owner_id = ?", session["user_id"]))
     transactions = db.execute("SELECT * FROM history WHERE owner_id = ?", session["user_id"])
-    transactions.reverse()
+    # for transaction in transactions:
+    #     # Convert 12 to 24 hr time to sort
+    #     in_time = datetime.strptime(transaction["time"], "%I:%M %p")
+    #     out_time = datetime.strftime(in_time, "%H:%M")
+    #     print(out_time)
+
+    transactions.sort(
+        key=lambda d: (
+                d["date"][-2:], 
+                d["date"][:2], 
+                d["date"][3:5], 
+                # d["time"]
+                datetime.strftime(datetime.strptime(d["time"], "%I:%M %p"), "%H:%M")
+            ), 
+            reverse=True
+    )
+    # for date in transactions:
+    #     print(f"{date['date']} {date['time']}")
+    # transactions.reverse()
 
     dates = db.execute("SELECT date FROM history WHERE owner_id = ?", session["user_id"])
     month_yr_list = []
@@ -355,6 +438,53 @@ def logout():
     session.clear()
     return redirect("/")
 
+# @socketio
+# @socketio.on("connect")
+# def handle_connect():
+#     print("client connected")
+
+@socketio.on("get budget of date")
+def handle_past_budget(data):
+
+    # Get the budget of the desired date
+    month, year = data[0], data[1]
+    past_budget = db.execute("SELECT * FROM budget_history WHERE owner_id = ? AND month = ? AND year = ?", session["user_id"], month, year)
+    # print(month, year)
+    # print(datetime.strptime(month, "%b").month)
+    # print(year[-2:])
+    # print("PAST")
+    # print(past_budget)
+
+    # CHECKPOINT
+    # Get the expenses calculated from that month's history
+    transactions = db.execute("SELECT * FROM history WHERE owner_id = ? AND date LIKE ? AND date LIKE ?", 
+        session["user_id"],
+        # Convert abbrev month to num
+        f"{datetime.strptime(month, '%b').month}%",
+        f"%{year[-2:]}"
+    )
+    # print("TRANSACTION")
+    # print(transactions)
+        
+    expenses = {}
+    for bucket in past_budget:
+        if bucket["bucket_name"] not in expenses:
+            expenses[bucket["bucket_name"]] = [0]
+    for transaction in transactions:
+        if transaction["item_type"] != "Deposit" and transaction["bucket"] in expenses:
+            expenses[transaction["bucket"]][0] += transaction["amt"]
+    print(expenses)
+
+    data = {
+        "past_budget": past_budget,
+        "expenses": expenses
+    }
+    # print(data)
+
+    emit('get budget of date', data)
+
+if __name__ == '__main__':
+    socketio.run(app)
 
 # Credits
 # https://flask.palletsprojects.com/en/1.1.x/patterns/viewdecorators/
@@ -373,4 +503,10 @@ def logout():
 # Convert num month to abbrev month - https://stackoverflow.com/questions/6557553/get-month-name-from-number
 
 # May want to consider flasksocket.io cause it does server to client and vice versa (I think)
-# https://stackoverflow.com/questions/42988907/how-do-you-send-messages-from-flask-server-python-to-html-client
+# Getting start with flasksocket.io
+    # https://stackoverflow.com/questions/42988907/how-do-you-send-messages-from-flask-server-python-to-html-client
+    # https://www.youtube.com/watch?v=AMp6hlA8xKA&t=4s
+    # https://flask-socketio.readthedocs.io/en/latest/getting_started.html
+# Convert b/w month name and number - https://www.adamsmith.haus/python/answers/how-to-convert-between-month-name-and-month-number-in-python
+# Convert AM/PM time to 24 hr format consisely - https://stackoverflow.com/questions/19229190/how-to-convert-am-pm-timestmap-into-24hs-format-in-python
+    

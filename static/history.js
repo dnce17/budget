@@ -1,4 +1,4 @@
-displayNameMoney();
+// displayNameMoney();
 
 let dates = document.querySelector('.dates');
 let row = document.querySelectorAll('.transaction-row');
@@ -34,6 +34,15 @@ dates.addEventListener('change', () => {
                     displayedDate[i].parentElement.classList.remove('hidden');
                 }
             }
+        }
+    }
+
+    // Make the last row that has no "hidden" class has the border-radius
+    // Get the first instance of row that is not hidden, counting from bottom up
+    for (let i = row.length - 1; i >= 0; i--) {     
+        if (!row[i].classList.contains('hidden')) {
+            // UNDER CONSTRUCTION: need to add style used for last row of tables
+            break;
         }
     }
 });

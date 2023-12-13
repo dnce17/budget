@@ -5,67 +5,80 @@
 {% endblock %}
 
 {% block main %}
-<div class="bucket-ctnr ctnr text-center shadow d-flex flex-column align-items-center">
-	<div class="header bucket-header">
-		<h1>Monthly Budget</h1>
-		<h3 class="get-started">
-			{% if not existing %}
-				You don't have any money buckets made. Click <a href="/">here</a> to get started! 
-			{% endif %}
-		</h3>
-	</div>
-	<form action="/monthly" method="post" class="bucket-form d-inline-block">
-		<table class="table bucket-table">
-			<thead class="bucket-head">
-				<tr class="col-headers">
-					<th>Buckets</th>
-					<th>Spending Limit per Month</th>
-					<th>Spent Thus Far</th>
-					<th>Amt Left for this Month</th>
-				</tr>
-			</thead>
-			<tbody class="bucket-body">
-				{% if existing %}
-					{% for bucket in existing %}
-						<tr>
-							<td><input class="bucket-input bucket-name saved" type="text" name="bucket" value="{{ bucket.name }}" readonly></td>
-							{% if bucket.month_limit %}
-								<td><input class="bucket-input limit saved int-only" type="text" inputmode="numeric" name="limit" placeholder="--" value="{{ thousands(bucket.month_limit) }}"></td>
-							{% else %}
-								<td><input class="bucket-input limit saved int-only" type="text" inputmode="numeric" name="limit" placeholder="--"></td>
-							{% endif %}
-							{% if bucket.month_limit and expenses[bucket.name][0] %}
-								<td><input class="spending saved" type="text" name="spending" placeholder="--" value="{{ usd(expenses[bucket.name][0]) }}" readonly></td>
-								<td><input class="remaining saved existing" type="text" name="remaining" value="{{ usd(bucket.month_limit - expenses[bucket.name][0]) }}" readonly></td>
-							{% elif bucket.month_limit %}
-								<td><input class="spending saved" type="text" name="spending" placeholder="--" value="{{ usd(0) }}" readonly></td>
-								<td><input class="remaining saved existing" type="text" name="remaining" value="{{ usd(bucket.month_limit) }}" readonly></td>
-							{% else %}
-								<td><input class="spending saved" type="text" name="spending" placeholder="--" readonly></td>
-								<td><input class="remaining saved" type="text" name="remaining" placeholder="--" readonly></td>
-							{% endif %}
-						</tr>
-					{% endfor%}
-				{% else %}
-					<td><input class="bucket-input bucket-name saved" type="text" name="bucket" placeholder="--" readonly></td>
-					<td><input class="bucket-input limit saved int-only" type="text" inputmode="numeric" name="limit" placeholder="--"></td>
-					<td><input class="spending saved" type="text" name="spending" placeholder="--" readonly></td>
-					<td><input class="remaining saved" type="text" name="remaining" placeholder="--" readonly></td>
+<div class="monthly-ctnr">
+	<div class="bucket-ctnr ctnr text-center shadow d-flex flex-column align-items-center">
+		<div class="header bucket-header">
+			<h1>Monthly Budget</h1>
+			<h3 class="get-started">
+				{% if not existing %}
+					You don't have any money buckets made. Click <a href="/">here</a> to get started! 
 				{% endif %}
-			</tbody>
-		</table>
-		{% if existing %}
-			<div class="first-layer-btns">
-				<button class="bucket-btn edit-btn">Edit</button>
+			</h3>
+			<!-- NOTE: once done, only let this show "if existing" -->
+			<select name="dates" class="text-center dates">
+				<option value="Current">Current</option>
+				{% for date in past_dates %}
+					<option value="{{ date }}">{{ date }}</option>
+				{% endfor %}
+			</select>
+		</div>
+		<form action="/monthly" method="post" class="bucket-form d-inline-block">
+			<table class="table bucket-table">
+				<thead class="bucket-head">
+					<tr class="col-headers">
+						<th>Buckets</th>
+						<th>Spending Limit per Month</th>
+						<th>Spent Thus Far</th>
+						<th>Amt Left for this Month</th>
+					</tr>
+				</thead>
+				<tbody class="bucket-body">
+					{% if existing %}
+						{% for bucket in existing %}
+							<tr>
+								<td><input class="bucket-input bucket-name saved" type="text" name="bucket" value="{{ bucket.name }}" readonly></td>
+								{% if bucket.month_limit %}
+									<td><input class="bucket-input limit saved int-only" type="text" inputmode="numeric" name="limit" placeholder="--" value="{{ thousands(bucket.month_limit) }}"></td>
+								{% else %}
+									<td><input class="bucket-input limit saved int-only" type="text" inputmode="numeric" name="limit" placeholder="--"></td>
+								{% endif %}
+								{% if bucket.month_limit and expenses[bucket.name][0] %}
+									<td><input class="spending saved" type="text" name="spending" placeholder="--" value="{{ usd(expenses[bucket.name][0]) }}" readonly></td>
+									<td><input class="remaining saved existing" type="text" name="remaining" value="{{ usd(bucket.month_limit - expenses[bucket.name][0]) }}" readonly></td>
+								{% elif bucket.month_limit %}
+									<td><input class="spending saved" type="text" name="spending" placeholder="--" value="{{ usd(0) }}" readonly></td>
+									<td><input class="remaining saved existing" type="text" name="remaining" value="{{ usd(bucket.month_limit) }}" readonly></td>
+								{% else %}
+									<td><input class="spending saved" type="text" name="spending" placeholder="--" readonly></td>
+									<td><input class="remaining saved" type="text" name="remaining" placeholder="--" readonly></td>
+								{% endif %}
+							</tr>
+						{% endfor%}
+					{% else %}
+						<tr class="empty-row">
+							<td><input class="bucket-input bucket-name saved" type="text" name="bucket" placeholder="--" readonly></td>
+							<td><input class="bucket-input limit saved int-only" type="text" inputmode="numeric" name="limit" placeholder="--"></td>
+							<td><input class="spending saved" type="text" name="spending" placeholder="--" readonly></td>
+							<td><input class="remaining saved" type="text" name="remaining" placeholder="--" readonly></td>
+						</tr>
+					{% endif %}
+				</tbody>
+			</table>
+			{% if existing %}
+			<div class="btns-ctnr">
+				<div class="first-layer-btns">
+					<button class="bucket-btn edit-btn">Edit</button>
+				</div>
+				<div class="second-layer-btns d-none">
+					<input class="bucket-btn save-btn" name="save" type="submit" value="Save">
+					<button class="bucket-btn cancel-btn">Cancel</button>
+				</div>
 			</div>
-			<div class="second-layer-btns d-none">
-				<input class="bucket-btn save-btn" name="save" type="submit" value="Save">
-				<button class="bucket-btn cancel-btn">Cancel</button>
-			</div>
-		{% endif %}
-	</form>
+			{% endif %}
+		</form>
+	</div>
+	<div class="donut-chart-ctnr shadow d-flex flex-wrap"></div>
 </div>
-<div class="donut-chart-ctnr shadow d-flex flex-wrap"></div>
 {% endblock %}
 
 {% block js %}
