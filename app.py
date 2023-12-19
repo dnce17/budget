@@ -469,6 +469,11 @@ def handle_save_empty_current_data(data):
             )
 
 
+@socketio.on("hide btns")
+def handle_hide_btns():
+    emit('hide btns')
+
+
 @socketio.on("get budget of date")
 def handle_past_budget(data):
 

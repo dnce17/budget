@@ -5,7 +5,7 @@
     // NOTE: there will likely be other considerations needed
 // Off top of my head, i believe you can just paste monthly code for saving and updating into index
 // 2) formatting in "remaining" column when remaining is exactly 0 
-// 3) ERROR: when going back to current when current table month limit has not been established
+// DONE: 3) ERROR: when going back to current when current table month limit has not been established
 // 4) Remove the edit button when going to noncurrent budget history
  
 let saveBtn = document.querySelector('.save-btn');
@@ -20,7 +20,6 @@ let balance = document.querySelector('.balance-amt');
 
 let form = document.querySelector('.bucket-form');
 let dates = document.querySelector('.dates');
-
 
 let numInputs = document.querySelectorAll('.int-only');
 intOnly(numInputs);
@@ -53,115 +52,102 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-saveBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    let bucketInputs = document.querySelectorAll('.bucket-input');
-    let limits = document.querySelectorAll('.limit');
-    let balance = document.querySelector('.balance-amt');
+function addBtnEvts() {
+    saveBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        let bucketInputs = document.querySelectorAll('.bucket-input');
+        let limits = document.querySelectorAll('.limit');
+        let balance = document.querySelector('.balance-amt');
 
-    // Chart component
-    const chartCtnr = document.querySelector('.donut-chart-ctnr');
-    let remainingMoney = document.querySelectorAll('.remaining');
-    let bucketNames = document.querySelectorAll('.bucket-name');
+        // Chart component
+        const chartCtnr = document.querySelector('.donut-chart-ctnr');
+        let remainingMoney = document.querySelectorAll('.remaining');
+        let bucketNames = document.querySelectorAll('.bucket-name');
 
-    // Send JS data to Python Flask Server
-    let itemNum = 0, data = {};
-    for (let i = 0; i < bucketInputs.length; i+=2) {
-        data["item" + String(itemNum)] = [bucketInputs[i].value, bucketInputs[i + 1].value];
-        itemNum++;
-    }
-    console.log(data)
-    sendToServer("/monthly", data);
-
-    if (chartCtnr.children.length == 0) {
-        async function getHistory() {
-            const response = await fetch("/api/history");
-            const historyJSON = await response.json();
-            makeDoughnutChart(bucketNames, monthLimit, spending, remainingMoney, chartCtnr, JSON.parse(historyJSON));
+        // Send JS data to Python Flask Server
+        let itemNum = 0, data = {};
+        for (let i = 0; i < bucketInputs.length; i+=2) {
+            data["item" + String(itemNum)] = [bucketInputs[i].value, bucketInputs[i + 1].value];
+            itemNum++;
         }
-        getHistory();
-    }
-    else {
-        while (chartCtnr.firstChild) {
-            chartCtnr.removeChild(chartCtnr.firstChild);
+        console.log(data)
+        sendToServer("/monthly", data);
+
+        if (chartCtnr.children.length == 0) {
+            async function getHistory() {
+                const response = await fetch("/api/history");
+                const historyJSON = await response.json();
+                makeDoughnutChart(bucketNames, monthLimit, spending, remainingMoney, chartCtnr, JSON.parse(historyJSON));
+            }
+            getHistory();
+        }
+        else {
+            while (chartCtnr.firstChild) {
+                chartCtnr.removeChild(chartCtnr.firstChild);
+            }
+
+            async function getHistory() {
+                const response = await fetch("/api/history");
+                const historyJSON = await response.json();
+                makeDoughnutChart(bucketNames, monthLimit, spending, remainingMoney, chartCtnr, JSON.parse(historyJSON));
+            }
+            getHistory();
         }
 
-        async function getHistory() {
-            const response = await fetch("/api/history");
-            const historyJSON = await response.json();
-            makeDoughnutChart(bucketNames, monthLimit, spending, remainingMoney, chartCtnr, JSON.parse(historyJSON));
+        // Remove ability to change input
+        layerOneBtns.classList.toggle('d-none');
+        layerTwoBtns.classList.toggle('d-none');
+        toggleBucketInputs(limits, true);
+
+        // Add back $ sign for month limit
+        for (let i = 0; i < limits.length; i++) {
+            // Delete input if just 0
+            if (+limits[i].value == 0) {
+                limits[i].value = '';
+            } 
+            else if (limits[i].value.length > 0 && isNaN(limits[i].value) == false) {
+                limits[i].value = '$' + thousandsFormat(limits[i].value);
+            }
         }
-        getHistory();
-    }
 
-    // Remove ability to change input
-    layerOneBtns.classList.toggle('d-none');
-    layerTwoBtns.classList.toggle('d-none');
-    toggleBucketInputs(limits, true);
-
-    // Add back $ sign for month limit
-    for (let i = 0; i < limits.length; i++) {
-        // Delete input if just 0
-        if (+limits[i].value == 0) {
-            limits[i].value = '';
-        } 
-        else if (limits[i].value.length > 0 && isNaN(limits[i].value) == false) {
-            limits[i].value = '$' + thousandsFormat(limits[i].value);
+        // Making "Spent Thus Far" blank if month limit is deleted/blank
+        for (let i = 0; i < monthLimit.length; i++) {
+            if (!(monthLimit[i].value.length > 0)) {
+                spending[i].value = '--';
+            }
         }
-    }
 
-    // Making "Spent Thus Far" blank if month limit is deleted/blank
-    for (let i = 0; i < monthLimit.length; i++) {
-        if (!(monthLimit[i].value.length > 0)) {
-            spending[i].value = '--';
+    });
+
+    // TO ADD: make it only work if the dropdown menu value is current
+    editBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        let limits = document.querySelectorAll('.limit');
+
+        layerOneBtns.classList.toggle('d-none');
+        layerTwoBtns.classList.toggle('d-none');
+        toggleBucketInputs(monthLimit, false);
+
+        for (let i = 0; i < limits.length; i++) {
+            limits[i].value = limits[i].value.replace(',', '');
         }
-    }
 
-});
+        for (let i = 0; i < limits.length; i++) {
+            limits[i].value = limits[i].value.replace('$', '');
+        }
+    });
 
+    cancelBtn.addEventListener('click', (e) => {
+        let bucketForm = document.querySelector('.bucket-form');
+        // To counteract the reportValidity of isFilled func, if activated
+        bucketForm.noValidate = true;
+    });
+}
+addBtnEvts();
 
-// TO ADD: make it only work if the dropdown menu value is current
-editBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    let limits = document.querySelectorAll('.limit');
-
-    layerOneBtns.classList.toggle('d-none');
-    layerTwoBtns.classList.toggle('d-none');
-    toggleBucketInputs(monthLimit, false);
-
-    for (let i = 0; i < limits.length; i++) {
-        limits[i].value = limits[i].value.replace(',', '');
-    }
-
-    for (let i = 0; i < limits.length; i++) {
-        limits[i].value = limits[i].value.replace('$', '');
-    }
-});
-
-cancelBtn.addEventListener('click', (e) => {
-    let bucketForm = document.querySelector('.bucket-form');
-    // To counteract the reportValidity of isFilled func, if activated
-    bucketForm.noValidate = true;
-});
 
 // TEST
 dates.addEventListener('change', (e) => {
-    // UNDER CONSTRUCTION: Save empty table in case user go back to "Current" data with dropdown, but limits are not made yet
-    // let emptyLimit = 0;
-    // for (let limit of monthLimit) {
-    //     if (!limit.value.length > 0) {
-    //         emptyLimit++
-    //     }
-    // }
-    
-    // if (emptyLimit == monthLimit.length) {
-    //     namesToSend = []
-    //     let bucketNames = document.querySelectorAll('.bucket-name');
-    //     for (let name of bucketNames) {
-    //         namesToSend.push(name.value)
-    //     }
-    //     socket.emit('save empty current data', namesToSend)
-    // }
 
     // Send month + yr to server to get desired budget history of that month
     if (dates.value == 'Current') {
@@ -175,7 +161,21 @@ dates.addEventListener('change', (e) => {
     }
 })
 
+socket.on('hide btns', function() {
+    // Remove the btns if table is not current (remove ability to edit)
+    let btnsCtnr = document.querySelector('.btns-ctnr');
+    if (dates.value != 'Current') {
+        btnsCtnr.classList.add('hidden');
+    }
+    else {
+        btnsCtnr.classList.remove('hidden');
+    }
+})
+
 socket.on('get budget of date', function(data) {
+
+    socket.emit('hide btns');
+
     let emptyLimit = 0;
     for (let limit of data['past_budget']) {
         if (limit['month_limit'] == null) {
@@ -186,7 +186,6 @@ socket.on('get budget of date', function(data) {
 
     let table = document.querySelector('.bucket-body');
     let donutCtnr = document.querySelector('.donut-chart-ctnr');
-    let btnsCtnr = document.querySelector('.btns-ctnr');
 
     // Remove data on table and donut chart
     while (table.firstChild) {
