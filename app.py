@@ -1,5 +1,8 @@
 # Started 10/17/23
 
+# CHECKPOINT 12/13/23
+# I changed dates to May 2022 and adding in other dates to get ready to test the budget history dropdown
+
 from flask import Flask, redirect, render_template, request, session, g, flash, jsonify
 from flask_session import Session
 from cs50 import SQL
@@ -22,6 +25,11 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
+
+# Custom filter
+@app.template_filter("hour_min")
+def hour_min_filter(value, format="%I:%M %p"):
+    return datetime.strptime(value, '%I:%M:%S:%f %p').strftime("%I:%M %p")
 
 # Connect database
 db = SQL("sqlite:///budget.db")
@@ -143,9 +151,9 @@ def monthly():
         # Add to or update the budget history
         if data is not None:
             current_abbrev_month = datetime.now().strftime("%b")
-            # current_abbrev_month = "Oct"
+            # current_abbrev_month = "Sep"
             current_full_yr = datetime.now().strftime("%Y")
-            # current_full_yr = 2022
+            # current_full_yr = 2021
             recent_history = db.execute("SELECT month, year FROM budget_history WHERE month = ? AND year = ?", current_abbrev_month, current_full_yr)
             
             # If history for current month exist, delete it and insert new one 
@@ -188,6 +196,8 @@ def monthly():
         transactions = db.execute("SELECT * FROM history WHERE owner_id = ?", session["user_id"])
         current_month = datetime.now().strftime("%m")
         current_yr = datetime.now().strftime("%y")
+        # current_month = "09"
+        # current_yr = "21"
         
         expenses = {}
         for bucket in existing:
@@ -212,7 +222,8 @@ def monthly():
             date = f"{history['month']} {str(history['year'])}"
             if date not in past_dates and history['month'] != datetime.now().strftime("%b") and history['year'] != datetime.now().strftime("%Y"): 
                 past_dates.append(f"{history['month']} {str(history['year'])}")
-        print(past_dates)
+        past_dates.reverse()
+        # print(past_dates)
         
         if existing:
             return render_template("monthly.html", 
@@ -322,7 +333,9 @@ def transaction():
                     money,
                     new_total,
                     datetime.now(tz_NY).strftime("%m/%d/%y"),
-                    datetime.now(tz_NY).strftime("%I:%M %p")
+                    # datetime.now(tz_NY).strftime("05/11/20"),
+                    # datetime.now(tz_NY).strftime("%I:%M %p")
+                    datetime.now(tz_NY).strftime('%I:%M:%S:%f')[:-4] + ' ' + datetime.now(tz_NY).strftime('%p')
                 )
 
                 # Update display of user balance
@@ -358,10 +371,11 @@ def transaction():
                 request.form.get("buckets"),
                 request.form.get("transaction"),
                 format(new_balance, ".2f"),
-                # datetime.now(tz_NY).strftime("%m/%d/%y"),
-                datetime.now(tz_NY).strftime("10/22/22"),
+                datetime.now(tz_NY).strftime("%m/%d/%y"),
+                # datetime.now(tz_NY).strftime("09/06/21"),
                 # datetime.now(tz_NY).strftime("%I:%M %p")
-                datetime.now(tz_NY).strftime("12:00 AM")
+                datetime.now(tz_NY).strftime('%I:%M:%S:%f')[:-4] + ' ' + datetime.now(tz_NY).strftime('%p')
+                # datetime.now(tz_NY).strftime("05:01:43:35 AM")
             )
 
             db.execute("UPDATE users SET money = ? WHERE id = ?", new_balance, session["user_id"])
@@ -394,19 +408,21 @@ def history():
     #     out_time = datetime.strftime(in_time, "%H:%M")
     #     print(out_time)
 
-    transactions.sort(
-        key=lambda d: (
-                d["date"][-2:], 
-                d["date"][:2], 
-                d["date"][3:5], 
-                # d["time"]
-                datetime.strftime(datetime.strptime(d["time"], "%I:%M %p"), "%H:%M")
-            ), 
-            reverse=True
-    )
+    # Note: This is technically unnecessary as long as user doesn't alter their system date and time somehow
+    # transactions.sort(
+    #     key=lambda d: (
+    #             d["date"][-2:], 
+    #             d["date"][:2], 
+    #             d["date"][3:5], 
+    #             # d["time"]
+    #             datetime.strftime(datetime.strptime(d["time"], "%I:%M %p"), "%H:%M")
+    #             # Time may also be the same, so milliseconds should be added
+    #         ), 
+    #         reverse=True
+    # )
     # for date in transactions:
     #     print(f"{date['date']} {date['time']}")
-    # transactions.reverse()
+    transactions.reverse()
 
     dates = db.execute("SELECT date FROM history WHERE owner_id = ?", session["user_id"])
     month_yr_list = []
@@ -438,20 +454,29 @@ def logout():
     session.clear()
     return redirect("/")
 
-# @socketio
-# @socketio.on("connect")
-# def handle_connect():
-#     print("client connected")
+# @socketio.on("save empty current data")
+# def handle_save_empty_current_data(data):
+#     print(data)
+#     # Save current data only if empty should user go back to "Current" data with dropdown
+#     recent_history = db.execute("SELECT month, year FROM budget_history WHERE month = ? AND year = ?", datetime.now().strftime("%b"), datetime.now().strftime("%Y"))
+#     if not recent_history:
+#         for bucket in data:
+#             db.execute("INSERT INTO budget_history (owner_id, bucket_name, month, year) VALUES (?, ?, ?, ?)",
+#                 session["user_id"],
+#                 bucket,
+#                 datetime.now().strftime("%b"),
+#                 datetime.now().strftime("%Y")
+#             )
+
 
 @socketio.on("get budget of date")
 def handle_past_budget(data):
 
     # Get the budget of the desired date
     month, year = data[0], data[1]
+    # print(month)
+    # print(year)
     past_budget = db.execute("SELECT * FROM budget_history WHERE owner_id = ? AND month = ? AND year = ?", session["user_id"], month, year)
-    # print(month, year)
-    # print(datetime.strptime(month, "%b").month)
-    # print(year[-2:])
     # print("PAST")
     # print(past_budget)
 
@@ -460,10 +485,12 @@ def handle_past_budget(data):
     transactions = db.execute("SELECT * FROM history WHERE owner_id = ? AND date LIKE ? AND date LIKE ?", 
         session["user_id"],
         # Convert abbrev month to num
-        f"{datetime.strptime(month, '%b').month}%",
+        f"{datetime.strptime(month, '%b').strftime('%m')}%",
         f"%{year[-2:]}"
     )
     # print("TRANSACTION")
+    # print(f"{datetime.strptime(month, '%b').month}%")
+    # print(f"%{year[-2:]}")
     # print(transactions)
         
     expenses = {}
@@ -473,13 +500,14 @@ def handle_past_budget(data):
     for transaction in transactions:
         if transaction["item_type"] != "Deposit" and transaction["bucket"] in expenses:
             expenses[transaction["bucket"]][0] += transaction["amt"]
-    print(expenses)
+    # print("EXPENSE")
+    # print(expenses)
 
     data = {
         "past_budget": past_budget,
         "expenses": expenses
     }
-    # print(data)
+    print(data)
 
     emit('get budget of date', data)
 
@@ -509,4 +537,6 @@ if __name__ == '__main__':
     # https://flask-socketio.readthedocs.io/en/latest/getting_started.html
 # Convert b/w month name and number - https://www.adamsmith.haus/python/answers/how-to-convert-between-month-name-and-month-number-in-python
 # Convert AM/PM time to 24 hr format consisely - https://stackoverflow.com/questions/19229190/how-to-convert-am-pm-timestmap-into-24hs-format-in-python
+
+# Custom filter - https://www.youtube.com/watch?v=sZl-H6GkHrk
     

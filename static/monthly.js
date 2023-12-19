@@ -5,6 +5,7 @@
     // NOTE: there will likely be other considerations needed
 // Off top of my head, i believe you can just paste monthly code for saving and updating into index
 // 2) formatting in "remaining" column when remaining is exactly 0 
+// 3) ERROR: when going back to current when current table month limit has not been established
  
 let saveBtn = document.querySelector('.save-btn');
 let editBtn = document.querySelector('.edit-btn');
@@ -144,12 +145,44 @@ cancelBtn.addEventListener('click', (e) => {
 
 // TEST
 dates.addEventListener('change', (e) => {
-    // console.log(dates.value.split(' '))
-    socket.emit('get budget of date', dates.value.split(' '));
+    // UNDER CONSTRUCTION: Save empty table in case user go back to "Current" data with dropdown, but limits are not made yet
+    // let emptyLimit = 0;
+    // for (let limit of monthLimit) {
+    //     if (!limit.value.length > 0) {
+    //         emptyLimit++
+    //     }
+    // }
+    
+    // if (emptyLimit == monthLimit.length) {
+    //     namesToSend = []
+    //     let bucketNames = document.querySelectorAll('.bucket-name');
+    //     for (let name of bucketNames) {
+    //         namesToSend.push(name.value)
+    //     }
+    //     socket.emit('save empty current data', namesToSend)
+    // }
+
+    // Send month + yr to server to get desired budget history of that month
+    if (dates.value == 'Current') {
+        let d = new Date();
+        d.setMonth(d.getMonth());
+        current = d.toLocaleString('en-US', { month: 'short' }) + ' ' + d.getFullYear();
+        socket.emit('get budget of date', current.split(' '));
+    }
+    else {
+        socket.emit('get budget of date', dates.value.split(' '));
+    }
 })
 
 socket.on('get budget of date', function(data) {
-    // console.log(data['expenses']["Basic Needs"][0]);
+    let emptyLimit = 0;
+    for (let limit of data['past_budget']) {
+        if (limit['month_limit'] == null) {
+            emptyLimit++
+        }
+    }
+    // console.log(emptyLimit);
+
     let table = document.querySelector('.bucket-body');
     let donutCtnr = document.querySelector('.donut-chart-ctnr');
     let btnsCtnr = document.querySelector('.btns-ctnr');
@@ -206,27 +239,22 @@ socket.on('get budget of date', function(data) {
     // DO LATER: Remove buttons if current data shown is not this month's data
 
     // Create doughnut chart
-    const chartCtnr = document.querySelector('.donut-chart-ctnr');
-    let bucketNames = document.querySelectorAll('.bucket-name');
-    let remainingMoney = document.querySelectorAll('.remaining');
-    spending = document.querySelectorAll('.spending');
-    monthLimit = document.querySelectorAll('.limit');
-    console.log(chartCtnr);
-    console.log(bucketNames);
-    console.log(remainingMoney);
-    console.log(JSON.stringify(data['expenses']));
-    makeDoughnutChart(bucketNames, monthLimit, spending, remainingMoney, chartCtnr, JSON.parse(JSON.stringify(data['expenses'])));
-    
+    if (emptyLimit != data['past_budget'].length) {
+        const chartCtnr = document.querySelector('.donut-chart-ctnr');
+        let bucketNames = document.querySelectorAll('.bucket-name');
+        let remainingMoney = document.querySelectorAll('.remaining');
+        spending = document.querySelectorAll('.spending');
+        monthLimit = document.querySelectorAll('.limit');
+        console.log(chartCtnr);
+        console.log(bucketNames);
+        console.log(remainingMoney);
+        console.log(JSON.stringify(data['expenses']));
+        makeDoughnutChart(bucketNames, monthLimit, spending, remainingMoney, chartCtnr, JSON.parse(JSON.stringify(data['expenses'])));
+    }
 });
-
-let monthlyCtnr = document.querySelector('.monthly-ctnr');
-console.log(monthlyCtnr);
-// form.appendChild(thisFile);
-// sendToServer("/monthly", data);
-
-
 
 // Credits
 // https://github.com/chartjs/Chart.js/issues/9850 --> fixed issue with chart resizing
 // https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
 // Format to dollar and comma in number in thousands - https://stackoverflow.com/questions/149055/how-to-format-numbers-as-currency-strings
+// num to abbrev month - https://www.codingbeautydev.com/blog/javascript-get-month-short-name

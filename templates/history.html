@@ -32,7 +32,7 @@
                     <td>{{ usd(transaction.amt) }}</td>
                     <td>{{ usd(transaction.new_balance) }}</td>
                     <td class="date">{{ transaction.date }}</td>
-                    <td>{{ transaction.time }}</td>
+                    <td>{{ transaction.time | hour_min }}</td>
                 </tr>
             {% endfor %}
         {% else %}
