@@ -6,6 +6,7 @@
 // Off top of my head, i believe you can just paste monthly code for saving and updating into index
 // 2) formatting in "remaining" column when remaining is exactly 0 
 // 3) ERROR: when going back to current when current table month limit has not been established
+// 4) Remove the edit button when going to noncurrent budget history
  
 let saveBtn = document.querySelector('.save-btn');
 let editBtn = document.querySelector('.edit-btn');
@@ -208,15 +209,22 @@ socket.on('get budget of date', function(data) {
             let input;
             switch (i) {
                 case 0:
-                    input = createInput(['bucket-input', 'bucket-name', 'saved'], 'text', bucket['bucket_name']);
+                    input = createInput(['bucket-input', 'bucket-name', 'saved'], 'text', 'bucket', bucket['bucket_name']);
                     break;
                 case 1:
-                    input = createInput(['bucket-input', 'limit', 'saved', 'int-only'], 'text', '$' + thousandsFormat(bucket['month_limit']));
+                    // input = createInput(['bucket-input', 'limit', 'saved', 'int-only'], 'text', '$' + thousandsFormat(bucket['month_limit']));
+                    // console.log(bucket['month_limit']);
+                    input = bucket['month_limit'].length != 0
+                            ? createInput(['bucket-input', 'limit', 'saved', 'int-only'], 'text', 'limit', '$' + thousandsFormat(bucket['month_limit']))
+                            : createInput(['bucket-input', 'limit', 'saved', 'int-only'], 'text', 'limit');
                     break;
                 case 2:
                     for (let name in data['expenses']) {
                         if (name == bucket['bucket_name']) {
-                            input = createInput(['spending', 'saved'], 'text', dollarFormat(data['expenses'][name]));
+                            // input = createInput(['spending', 'saved'], 'text', dollarFormat(data['expenses'][name]));
+                            input = bucket['month_limit'].length != 0 
+                                    ? createInput(['spending', 'saved'], 'text', 'spending', dollarFormat(data['expenses'][name]))
+                                    : createInput(['spending', 'saved'], 'text', 'spending');
                             break;
                         }
                     }
@@ -224,7 +232,10 @@ socket.on('get budget of date', function(data) {
                 case 3:
                     for (let name in data['expenses']) {
                         if (name == bucket['bucket_name']) {
-                            input = createInput(['remaining', 'saved'], 'text', dollarFormat(bucket['month_limit'] - data['expenses'][name]));
+                            // input = createInput(['remaining', 'saved'], 'text', dollarFormat(bucket['month_limit'] - data['expenses'][name]));
+                            input = bucket['month_limit'].length != 0
+                                    ? createInput(['remaining', 'saved'], 'text', 'remaining', dollarFormat(bucket['month_limit'] - data['expenses'][name]))
+                                    : createInput(['remaining', 'saved'], 'text', 'remaining');
                             break;
                         }
                     }
@@ -245,10 +256,10 @@ socket.on('get budget of date', function(data) {
         let remainingMoney = document.querySelectorAll('.remaining');
         spending = document.querySelectorAll('.spending');
         monthLimit = document.querySelectorAll('.limit');
-        console.log(chartCtnr);
-        console.log(bucketNames);
-        console.log(remainingMoney);
-        console.log(JSON.stringify(data['expenses']));
+        // console.log(chartCtnr);
+        // console.log(bucketNames);
+        // console.log(remainingMoney);
+        // console.log(JSON.stringify(data['expenses']));
         makeDoughnutChart(bucketNames, monthLimit, spending, remainingMoney, chartCtnr, JSON.parse(JSON.stringify(data['expenses'])));
     }
 });

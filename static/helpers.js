@@ -82,13 +82,23 @@ function thousandsFormat(amt) {
     return formatter.format(amt);
 }
 
-function createInput(classArr, inputType, inputVal) {
+function createInput(classArr, inputType, inputName, inputVal='') {
     let input = document.createElement('input');
+    // console.log(inputVal.replace('$', '')[0]);
+    // if (inputVal.replace('$', '')[0] == '0') {
+    // }
+
     for (let className of classArr) {
         input.classList.add(className);
     }
     input.setAttribute('type', inputType);
     input.setAttribute('value', inputVal);
+    input.setAttribute('name', inputName);
+    input.setAttribute('placeholder', '--');
+
+    if (inputName == 'limit') {
+        input.setAttribute('inputmode', 'numeric');
+    }
     input.readOnly = true;
 
     return input

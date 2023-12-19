@@ -454,19 +454,19 @@ def logout():
     session.clear()
     return redirect("/")
 
-# @socketio.on("save empty current data")
-# def handle_save_empty_current_data(data):
-#     print(data)
-#     # Save current data only if empty should user go back to "Current" data with dropdown
-#     recent_history = db.execute("SELECT month, year FROM budget_history WHERE month = ? AND year = ?", datetime.now().strftime("%b"), datetime.now().strftime("%Y"))
-#     if not recent_history:
-#         for bucket in data:
-#             db.execute("INSERT INTO budget_history (owner_id, bucket_name, month, year) VALUES (?, ?, ?, ?)",
-#                 session["user_id"],
-#                 bucket,
-#                 datetime.now().strftime("%b"),
-#                 datetime.now().strftime("%Y")
-#             )
+@socketio.on("save empty current data")
+def handle_save_empty_current_data(data):
+    print(data)
+    # Save current data only if empty should user go back to "Current" data with dropdown
+    recent_history = db.execute("SELECT month, year FROM budget_history WHERE month = ? AND year = ?", datetime.now().strftime("%b"), datetime.now().strftime("%Y"))
+    if not recent_history:
+        for bucket in data:
+            db.execute("INSERT INTO budget_history (owner_id, bucket_name, month, year) VALUES (?, ?, ?, ?)",
+                session["user_id"],
+                bucket,
+                datetime.now().strftime("%b"),
+                datetime.now().strftime("%Y")
+            )
 
 
 @socketio.on("get budget of date")
