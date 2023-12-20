@@ -96,7 +96,7 @@ def index():
                     for i in range(len(existing_buckets)): 
                         update_bucket_names(existing_buckets, new_buckets, i)
                         update_allocations(existing_buckets, new_buckets, old_allocations, new_allocations, i)
-                    print("same amt of buckets")
+                    # print("same amt of buckets")
                 elif len(existing_buckets) < len(new_buckets):
                     # Check the index that both old and new buckets both share (and not out of range)
                     for i in range(len(existing_buckets)): 
@@ -111,7 +111,7 @@ def index():
                             new_buckets[i], 
                             new_allocations[i]
                         )
-                    print("new data has been inserted")
+                    # print("new data has been inserted")
                 elif len(existing_buckets) > len(new_buckets):
                     for i in range(len(new_buckets)):
                         update_bucket_names(existing_buckets, new_buckets, i)
@@ -124,17 +124,113 @@ def index():
                             existing_buckets[i],
                             i
                         )
+
+                # CONSTRUCTION: Update budget_history table (in case user does not go back to monthly budget to change themselves)
+                # WILL PUT INTO A FUNC AND CALL IT
+                # Update the budget_history if 
+                # Need to check if the table was changed at all first 
+                    # Get the bucket names from bucket table and budget_history, then compare them
+                buckets = db.execute("SELECT name FROM buckets WHERE owner_id = ?", session["user_id"])
+                current_budget = db.execute("SELECT bucket_name FROM budget_history WHERE month = ? AND year = ?", datetime.now().strftime("%b"), datetime.now().strftime("%Y"))
+                # print(buckets)
+                # print("---")
+                # print(current_budget)
+
+                # Just insert if bucket had not been made yet = WRONG - this should go in the else this if this "if existing"
+                # if len(current_budget) == 0:
+                #     for i in range(len(buckets)):
+                #         db.execute("INSERT INTO budget_history (owner_id, index_num, bucket_name, month, year) VALUES (?, ?, ?, ?, ?)", 
+                #             session["user_id"],
+                #             i,
+                #             buckets[i]['name'],
+                #             datetime.now().strftime("%b"), 
+                #             datetime.now().strftime("%Y")
+                #         )
+                #     print("new current budget inserted")
+                if len(buckets) == len(current_budget):
+                    for i in range(len(buckets)):
+                        if buckets[i]['name'] != current_budget[i]['bucket_name']:
+                            print("DIFFERENT")
+                            print(buckets[i]['name'])
+                            print(i)
+                            db.execute("UPDATE budget_history SET bucket_name = ?, month_limit = ? WHERE owner_id = ? AND index_num = ? AND bucket_name = ? AND month = ? AND year = ?",
+                                buckets[i]['name'],
+                                '',
+                                session["user_id"],
+                                i,
+                                current_budget[i]['bucket_name'],
+                                datetime.now().strftime("%b"), 
+                                datetime.now().strftime("%Y")
+                            )
+                    print("*updated to the amt of index that buckets and budget_history share")
+                elif len(buckets) < len(current_budget):
+                    # Check the index that both old and new buckets both share (and not out of range)
+                    for i in range(len(buckets)):
+                        if buckets[i]['name'] != current_budget[i]['bucket_name']:
+                            db.execute("UPDATE budget_history SET bucket_name = ?, month_limit = ? WHERE owner_id = ? AND index_num = ? AND bucket_name = ? AND month = ? AND year = ?",
+                                buckets[i]['name'],
+                                '',
+                                session["user_id"],
+                                i,
+                                current_budget[i]['bucket_name'],
+                                datetime.now().strftime("%b"), 
+                                datetime.now().strftime("%Y")
+                            )
+                            print(buckets[i]['name'] + "is not same as" + current_budget[i]['bucket_name'])
+
+                    for i in range(len(buckets), len(current_budget)):
+                        db.execute("DELETE FROM budget_history WHERE owner_id = ? AND bucket_name = ? AND index_num = ?", 
+                            session["user_id"],
+                            current_budget[i]['bucket_name'],
+                            i
+                        )
+                    print("budget_history excess buckets deleted")
+                elif len(buckets) > len(current_budget):
+                    for i in range(len(current_budget)):
+                        if buckets[i]['name'] != current_budget[i]['bucket_name']:
+                            db.execute("UPDATE budget_history SET bucket_name = ?, month_limit = ? WHERE owner_id = ? AND index_num = ? AND bucket_name = ? AND month = ? AND year = ?",
+                                buckets[i]['name'],
+                                '',
+                                session["user_id"],
+                                i,
+                                current_budget[i]['bucket_name'],
+                                datetime.now().strftime("%b"), 
+                                datetime.now().strftime("%Y")
+                            )
+                    for i in range(len(current_budget), len(buckets)):
+                        db.execute("INSERT INTO budget_history (owner_id, index_num, bucket_name, month, year) VALUES (?, ?, ?, ?, ?)", 
+                            session["user_id"],
+                            i,
+                            buckets[i]['name'],
+                            datetime.now().strftime("%b"), 
+                            datetime.now().strftime("%Y")
+                        )
+                    print("new buckets added to budget_history")
+
             else:
                 data_to_list = list(data.items())
                 index = 0
                 for bucket in data:
+                    # Insert into bucket
                     db.execute("INSERT INTO buckets (owner_id, index_num, name, percent_allocation) VALUES (?, ?, ?, ?)", 
                         session["user_id"],
                         index,
                         data[bucket][0], 
                         data[bucket][1]
                     )
+                    # Insert into budget history
+                    db.execute("INSERT INTO budget_history (owner_id, index_num, bucket_name, month, year) VALUES (?, ?, ?, ?, ?)", 
+                        session["user_id"],
+                        index,
+                        data[bucket][0],
+                        datetime.now().strftime("%b"), 
+                        datetime.now().strftime("%Y")
+                    )
+                    print("new current budget inserted")
+
                     index += 1
+            
+                
                     
         return redirect("/")
     else:
@@ -148,126 +244,23 @@ def index():
             return render_template("index.html", existing=existing, username=username, balance=usd(money), money=money, usd=usd)
 
         return render_template("index.html", username=username, balance=usd(money))
-
-# LATER USE
- # CONSTRUCTION: Update budget_history table (in case user does not go back to monthly budget to change themselves)
-                # WILL PUT INTO A FUNC AND CALL IT
-                # Update the budget_history if 
-                # Need to check if the table was changed at all first 
-                    # Get the bucket names from bucket table and budget_history, then compare them
-                # buckets = db.execute("SELECT name FROM buckets WHERE owner_id = ?", session["user_id"])
-                # current_budget = db.execute("SELECT bucket_name FROM budget_history WHERE month = ? AND year = ?", datetime.now().strftime("%b"), datetime.now().strftime("%Y"))
-                # print(buckets)
-                # print("---")
-                # print(current_budget)
-
-                # Just insert if bucket had not been made yet
-                # if len(current_budget) == 0:
-                #     for i in range(len(buckets)):
-                #         db.execute("INSERT INTO budget_history (owner_id, bucket_name, month, year) VALUES (?, ?, ?, ?)", 
-                #             session["user_id"],
-                #             buckets[i]['name'],
-                #             datetime.now().strftime("%b"), 
-                #             datetime.now().strftime("%Y")
-                #         )
-                #     print("new current budget inserted")
-                # elif len(buckets) == len(current_budget):
-                #     for i in range(len(buckets)):
-                #         if buckets[i]['name'] != current_budget[i]['bucket_name']:
-                #             print(buckets[i]['name'])
-                #             print(i)
-                #             db.execute("UPDATE budget_history SET bucket_name = ?, month_limit = ? WHERE owner_id = ? AND bucket_name = ? AND month = ? AND year = ?",
-                #                 buckets[i]['name'],
-                #                 '',
-                #                 session["user_id"],
-                #                 current_budget[i]['bucket_name'],
-                #                 datetime.now().strftime("%b"), 
-                #                 datetime.now().strftime("%Y")
-                #             )
-                    # print("*updated to the amt of index that buckets and budget_history share")
-                # elif len(buckets) < len(current_budget):
-                #     # Check the index that both old and new buckets both share (and not out of range)
-                #     for i in range(len(buckets)):
-                #         if buckets[i]['name'] != current_budget[i]['bucket_name']:
-                #             db.execute("UPDATE budget_history SET bucket_name = ?, month_limit = ? WHERE owner_id = ? AND bucket_name = ? AND month = ? AND year = ?",
-                #                 buckets[i]['name'],
-                #                 '',
-                #                 session["user_id"],
-                #                 current_budget[i]['bucket_name'],
-                #                 datetime.now().strftime("%b"), 
-                #                 datetime.now().strftime("%Y")
-                #             )
-                #             print(buckets[i]['name'] + "is not same as" + current_budget[i]['bucket_name'])
-                #     for i in range(len(buckets), len(current_budget)):
-                #         db.execute("DELETE FROM budget_history WHERE owner_id = ? AND bucket_name = ?", 
-                #             session["user_id"],
-                #             current_budget[i]['bucket_name']
-                #         )
-                #     print("budget_history excess buckets deleted")
-                # elif len(buckets) > len(current_budget):
-                #     for i in range(len(current_budget)):
-                #         if buckets[i]['name'] != current_budget[i]['bucket_name']:
-                #             db.execute("UPDATE budget_history SET bucket_name = ?, month_limit = ? WHERE owner_id = ? AND bucket_name = ? AND month = ? AND year = ?",
-                #                 buckets[i]['name'],
-                #                 '',
-                #                 session["user_id"],
-                #                 current_budget[i]['bucket_name'],
-                #                 datetime.now().strftime("%b"), 
-                #                 datetime.now().strftime("%Y")
-                #             )
-                #     for i in range(len(current_budget), len(buckets)):
-                #         db.execute("INSERT INTO budget_history (owner_id, bucket_name, month, year) VALUES (?, ?, ?, ?)", 
-                #             session["user_id"],
-                #             buckets[i]['name'],
-                #             datetime.now().strftime("%b"), 
-                #             datetime.now().strftime("%Y")
-                #         )
-                #     print("new buckets added to budget_history")
-                
-
-                # for i in range(len(buckets)):
-                #     if buckets[i]['name'] != current_budget[i]['bucket_name']:
-                #         db.execute("UPDATE budget_history SET bucket_name = ?, month_limit = ? WHERE owner_id = ? AND bucket_name = ? AND month = ? AND year = ?",
-                #             buckets[i]['name'],
-                #             '',
-                #             session["user_id"],
-                #             current_budget[i]['bucket_name'],
-                #             datetime.now().strftime("%b"), 
-                #             datetime.now().strftime("%Y")
-                #         )
-                #     print("updated to the amt of index that buckets and budget_history share")
-                # if len(buckets) < len(current_budget):
-                #     for i in range(len(buckets), len(current_budget)):
-                #         db.execute("DELETE FROM budget_history WHERE owner_id = ? AND bucket_name = ?", 
-                #             session["user_id"],
-                #             current_budget[i]['bucket_name']
-                #         )
-                #     print("budget_history excess buckets deleted")
-                # elif len(buckets) > len(current_budget):
-                #     for i in range(len(current_budget), len(buckets)):
-                #         db.execute("INSERT INTO budget_history (owner_id, bucket_name, month, year) VALUES (?, ?, ?, ?)", 
-                #             session["user_id"],
-                #             buckets[i]['name'],
-                #             datetime.now().strftime("%b"), 
-                #             datetime.now().strftime("%Y")
-                #         )
-                #     print("new buckets added to budget_history")
-                    
-
-    
-
-                        # if same, then nothing happens
-                        # if even just one is different, then...
-                            # Note: positioning should match too
-                            # Row is added = add name and make month limit blank
-                            # Row is delete = remove the row entirely 
-                            # Bucket name of a row is altered = UPDATE the name and make the month limit blank
-                            # A mix of the stuff above
     
 
 @app.route("/monthly", methods=["GET", "POST"])
 @login_required
 def monthly():
+
+    # ADDING FAKE DATA FOR TESTING
+    # db.execute("INSERT INTO budget_history (owner_id, index_num, bucket_name, month_limit, month, year) VALUES (?, ?, ?, ?, ?, ?)", 
+    #     2, 
+    #     3, 
+    #     "Enjoyment", 
+    #     50,
+    #     "May", 
+    #     2020
+    # )
+
+
     if request.method == "POST":
         data = request.get_json(silent=True)
         # print(data)
@@ -298,25 +291,35 @@ def monthly():
                     current_full_yr
                 )
                 # Insert the new one for current month
+                data_to_list = list(data.items())
+                index = 0
                 for bucket in data:
-                    db.execute("INSERT INTO budget_history (owner_id, bucket_name, month_limit, month, year) VALUES (?, ?, ?, ?, ?)",
+                    db.execute("INSERT INTO budget_history (owner_id, index_num, bucket_name, month_limit, month, year) VALUES (?, ?, ?, ?, ?, ?)",
                         session["user_id"],
+                        index,
                         data[bucket][0],
                         data[bucket][1],
                         current_abbrev_month,
                         current_full_yr
                     )
+                    index += 1
                 print("budget history for this month exist. Old has been deleted and new inserted")
             # If not, just insert
+            # This actually is not needed since this budget_history will be made from making bucket in 
+            # index, but might be needed in future for something
             else:
+                data_to_list = list(data.items())
+                index = 0
                 for bucket in data:
-                    db.execute("INSERT INTO budget_history (owner_id, bucket_name, month_limit, month, year) VALUES (?, ?, ?, ?, ?)",
+                    db.execute("INSERT INTO budget_history (owner_id, index_num, bucket_name, month_limit, month, year) VALUES (?, ?, ?, ?, ?, ?)",
                         session["user_id"],
+                        index,
                         data[bucket][0],
                         data[bucket][1],
                         current_abbrev_month,
                         current_full_yr
                     )
+                    index += 1
                 print("this month's budget doesn't exist, so new budget has been inserted")
 
         return redirect("/monthly")
@@ -645,7 +648,7 @@ def handle_past_budget(data):
         "past_budget": past_budget,
         "expenses": expenses
     }
-    print(data)
+    # print(data)
 
     emit('get budget of date', data)
 

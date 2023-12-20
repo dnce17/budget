@@ -216,7 +216,12 @@ socket.on('get budget of date', function(data) {
                     break;
                 case 1:
                     // input = createInput(['bucket-input', 'limit', 'saved', 'int-only'], 'text', '$' + thousandsFormat(bucket['month_limit']));
-                    // console.log(bucket['month_limit']);
+                    
+                    // Ensure not null or else rest of code will not work
+                    if (bucket['month_limit'] == null) {
+                        bucket['month_limit'] = '';
+                    }
+
                     input = bucket['month_limit'].length != 0
                             ? createInput(['bucket-input', 'limit', 'saved', 'int-only'], 'text', 'limit', '$' + thousandsFormat(bucket['month_limit']))
                             : createInput(['bucket-input', 'limit', 'saved', 'int-only'], 'text', 'limit');
