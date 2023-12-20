@@ -4,9 +4,13 @@
 // b/c monthly table will be of before delete
     // NOTE: there will likely be other considerations needed
 // Off top of my head, i believe you can just paste monthly code for saving and updating into index
-// 2) formatting in "remaining" column when remaining is exactly 0 
-// DONE: 3) ERROR: when going back to current when current table month limit has not been established
-// 4) Remove the edit button when going to noncurrent budget history
+// DONE: 2) ERROR: when going back to current when current table month limit has not been established
+// DONE 3) Remove the edit button when going to noncurrent budget history
+// 4) temporailty remove dropdown list history if edit is clicked and return once saved
+
+// Minor
+// 1) formatting in "remaining" column when remaining is exactly 0 
+// 2) last row of history table when filtering
  
 let saveBtn = document.querySelector('.save-btn');
 let editBtn = document.querySelector('.edit-btn');

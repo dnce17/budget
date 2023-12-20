@@ -74,6 +74,15 @@ saveBtn.addEventListener('click', (e) => {
         return;
     }
 
+    // Check that all names are unique
+    for (let i = 0; i < bucketNames.length; i++) {
+        if (i > 0 && bucketNames[i].value == bucketNames[i - 1].value) {
+            saveBtn.setCustomValidity('Bucket names must all be different');
+            saveBtn.reportValidity();
+            return;
+        }
+    }
+
     // Check that the % not below/exceed 100
     let total = 0;
     allocations.forEach((amt) => {

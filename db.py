@@ -12,16 +12,17 @@ db = con.cursor()
 #                               )"""
 #                           )
 
-# buckets = db.execute("""CREATE TABLE buckets (
-#                                 id INTEGER NOT NULL,
-#                                 owner_id INTEGER NOT NULL,
-#                                 name TEXT NOT NULL,
-#                                 percent_allocation INTEGER NOT NULL,
-#                                 month_limit NUMERIC,
-#                                 FOREIGN KEY(owner_id) REFERENCES users(id),
-#                                 PRIMARY KEY(id)
-#                               )"""
-#                           )
+buckets = db.execute("""CREATE TABLE buckets (
+                                id INTEGER NOT NULL,
+                                owner_id INTEGER NOT NULL,
+                                index_num INTEGER NOT NULL,
+                                name TEXT NOT NULL,
+                                percent_allocation INTEGER NOT NULL,
+                                month_limit NUMERIC,
+                                FOREIGN KEY(owner_id) REFERENCES users(id),
+                                PRIMARY KEY(id)
+                              )"""
+                          )
 
 # spendings = db.execute("""CREATE TABLE spendings (
 #                                 id INTEGER NOT NULL,
@@ -62,17 +63,17 @@ db = con.cursor()
 #                               )"""
 #                           )
 
-budget_history = db.execute("""CREATE TABLE budget_history (
-                                id INTEGER NOT NULL,
-                                owner_id INTEGER NOT NULL,
-                                bucket_name TEXT NOT NULL,
-                                month_limit NUMERIC,
-                                month TEXT NOT NULL,
-                                year INTEGER NOT NULL,
-                                FOREIGN KEY(owner_id) REFERENCES users(id),
-                                PRIMARY KEY(id)
-                              )"""
-                          )
+# budget_history = db.execute("""CREATE TABLE budget_history (
+#                                 id INTEGER NOT NULL,
+#                                 owner_id INTEGER NOT NULL,
+#                                 bucket_name TEXT NOT NULL,
+#                                 month_limit NUMERIC,
+#                                 month TEXT NOT NULL,
+#                                 year INTEGER NOT NULL,
+#                                 FOREIGN KEY(owner_id) REFERENCES users(id),
+#                                 PRIMARY KEY(id)
+#                               )"""
+#                           )
 
 # monthly_budget = db.execute("""CREATE TABLE monthly_budget (
 #                                 id INTEGER NOT NULL,
