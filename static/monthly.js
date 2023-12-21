@@ -1,12 +1,13 @@
 // displayNameMoney();
 
-// TO DO LATER - 1) if user ONLY delete a row from index and nothing else (MAYBE), save the monthly table in budget history
-// b/c monthly table will be of before delete
+// TO DO LATER - 
+// DONE 1) if user ONLY delete a row from index and nothing else (MAYBE), save the monthly table in budget history
+    // b/c monthly table will be of before delete
     // NOTE: there will likely be other considerations needed
-// Off top of my head, i believe you can just paste monthly code for saving and updating into index
+    // Off top of my head, i believe you can just paste monthly code for saving and updating into index
 // DONE: 2) ERROR: when going back to current when current table month limit has not been established
 // DONE 3) Remove the edit button when going to noncurrent budget history
-// 4) temporailty remove dropdown list history if edit is clicked and return once saved
+// DONE 4)  edit is clicked and return once saved
 
 // Minor
 // 1) formatting in "remaining" column when remaining is exactly 0 
@@ -159,6 +160,12 @@ dates.addEventListener('change', (e) => {
         d.setMonth(d.getMonth());
         current = d.toLocaleString('en-US', { month: 'short' }) + ' ' + d.getFullYear();
         socket.emit('get budget of date', current.split(' '));
+
+        // Show the edit btn again when returning to "Current" (in case user changed history while save btn was shown)
+        if (layerOneBtns.classList.contains('d-none')) {
+            layerOneBtns.classList.toggle('d-none');
+            layerTwoBtns.classList.toggle('d-none');
+        }
     }
     else {
         socket.emit('get budget of date', dates.value.split(' '));

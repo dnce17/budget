@@ -88,11 +88,17 @@ saveBtn.addEventListener('click', (e) => {
     allocations.forEach((amt) => {
         total += parseInt(amt.value);
     });
-    if (total < 100 || total > 100) {
-        saveBtn.setCustomValidity('% must equal to 100');
+    // if (total < 100 || total > 100) {
+    //     saveBtn.setCustomValidity('% must equal to 100');
+    //     saveBtn.reportValidity();
+    //     return;
+    // }
+    if (total > 100) {
+        saveBtn.setCustomValidity('% total is greater than 100');
         saveBtn.reportValidity();
         return;
     }
+
 
     let itemNum = 0, data = {};
     for (let i = 0; i < bucketInputs.length; i+=2) {
