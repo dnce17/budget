@@ -9,6 +9,8 @@
 // DONE 3) Remove the edit button when going to noncurrent budget history
 // DONE 4)  edit is clicked and return once saved
 
+// last feature = line graph that show total spent and also amt negative =double line graph
+
 // Minor
 // 1) formatting in "remaining" column when remaining is exactly 0 
 // 2) last row of history table when filtering
@@ -284,3 +286,27 @@ socket.on('get budget of date', function(data) {
 // https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
 // Format to dollar and comma in number in thousands - https://stackoverflow.com/questions/149055/how-to-format-numbers-as-currency-strings
 // num to abbrev month - https://www.codingbeautydev.com/blog/javascript-get-month-short-name
+
+
+const lineChartCanvas = document.querySelector('.line-chart');
+socket.emit('data for line chart',);
+
+socket.on('data for line chart', function(data) {
+    let lineChart = new Chart(lineChartCanvas, {
+        type: 'line',
+            data: {
+            labels: data,
+            datasets: [{
+                label: "online tutorial subjects",
+                data: [20, 40, 30, 35, 30, 20],
+                backgroundColor: ['yellow', 'aqua', 'pink', 'lightgreen', 'lightblue', 'gold'],
+                borderColor: ['black'],
+                borderWidth: 2,
+                pointRadius: 5,
+            }],
+            },
+            options: {
+                responsive: false,
+        },
+    });
+});

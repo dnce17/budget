@@ -11,6 +11,7 @@ import json
 from datetime import datetime
 from pytz import timezone
 from flask_socketio import SocketIO, emit
+import pprint
 
 from helpers import login_required, is_float, usd, thousands
 
@@ -650,7 +651,80 @@ def handle_past_budget(data):
     }
     # print(data)
 
-    emit('get budget of date', data)
+    emit("get budget of date", data)
+
+
+@socketio.on("data for line chart")
+def handle_line_chart():
+    dates = db.execute("SELECT DISTINCT month, year FROM budget_history WHERE owner_id = ?", session["user_id"])
+    expenses = db.execute("SELECT * FROM history WHERE owner_id = ?", session["user_id"])
+
+    # dates_list, total_expenses_list = [], []
+    # # expenses_list = []
+    # total = 0
+    # # Get all dates (oldest to most recent)
+    # for date in dates:
+    #     dates_list.append(f"{date['month']} {date['year']}")
+    #     # CHANGE dates_list to {} if use this
+    #     # if f"{date['month']} {date['year']}" not in dates_list:
+    #     #     dates_list[f"{date['month']} {date['year']}"] = []
+    # # print(dates_list)
+    
+
+    # for i in range(len((dates_list))):
+    #     abbrev_month = dates_list[i][:3]
+    #     for expense in expenses:
+    #         num_to_month = datetime.strptime(expense['date'][:2], '%m').strftime('%b')
+    #         # Get total spent for each month year (oldest to most recent)
+    #         if abbrev_month == num_to_month and expense['item_type'] != "Deposit":
+    #             total += expense['amt']
+    #     total_expenses_list.append(f"{total:.2f}")
+    #     total = 0
+    # print(expenses_list)
+
+    # Arr for total negatives (amt spent over budget)
+    # Get month limit to determine remaining
+    # limits = db.execute("SELECT bucket_name, month_limit, month, year FROM budget_history WHERE owner_id = ?", session["user_id"])
+    # over_limit = []
+    # for limit in limits:
+    #     print(f'{limit["bucket_name"]}, {limit["month_limit"]}, {limit["month"]} {limit["year"]}')
+
+    # --- TESTING SOMETHING NEW
+    dates_list = {}
+    for date in dates:
+        if f"{date['month']} {date['year']}" not in dates_list:
+            dates_list[f"{date['month']} {date['year']}"] = {}
+            dates_list[f"{date['month']} {date['year']}"]["total_spent"] = {}
+            dates_list[f"{date['month']} {date['year']}"]["bucket_spent"] = {}
+            dates_list[f"{date['month']} {date['year']}"]["bucket_remaining"] = {}
+    # print(dates_list)
+
+    total = 0
+    for date in dates_list:
+        for expense in expenses:
+            # Input bucket names of only 1 month year into dict to start
+            month_yr = f'{datetime.strptime(expense["date"][:2], "%m").strftime("%b")} {datetime.strptime(expense["date"][-2:], "%y").strftime("%Y")}'
+            if month_yr == date:
+                bucket_name = expense["bucket"]
+                # Get amt spent for each bucket of a month (bucket_spent)
+                if expense["bucket"] not in dates_list[date]["bucket_spent"]:
+                    # dates_list[date][bucket_name] = 0
+                    dates_list[date]["bucket_spent"][bucket_name] = 0
+                if expense["item_type"] != "Deposit":
+                    # dates_list[date][bucket_name] += expense["amt"]
+                    dates_list[date]["bucket_spent"][bucket_name] += expense["amt"]
+    pprint.pprint(dates_list)
+            # print(buckets_for_month)
+            # else:
+            #     if 
+
+            # month_yr = f'{datetime.strptime(expense["date"][:2], "%m").strftime("%b")} {datetime.strptime(expense["date"][-2:], "%y").strftime("%Y")}'
+            # if (date == month_yr):
+            #     print(date)
+            #     bucket_expense += expense['amt']
+
+
+    emit("data for line chart", dates_list)
 
 if __name__ == '__main__':
     socketio.run(app)
