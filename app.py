@@ -32,6 +32,7 @@ Session(app)
 def hour_min_filter(value, format="%I:%M %p"):
     return datetime.strptime(value, '%I:%M:%S:%f %p').strftime("%I:%M %p")
 
+
 # Connect database
 db = SQL("sqlite:///budget.db")
 
