@@ -211,6 +211,7 @@ function makeDoughnutChart(bucketNames, monthLimit, spending, remainingMoney, ch
                             font: {
                                 size: '15'
                             },
+                            color: 'black',
                             position: 'bottom',
                         },
                         doughnutLabel: {
@@ -220,7 +221,7 @@ function makeDoughnutChart(bucketNames, monthLimit, spending, remainingMoney, ch
                                     font: {
                                         size: '20'
                                     },
-                                    color: 'grey'
+                                    color: 'black'
                                 },
                             ]
                         },
@@ -269,6 +270,68 @@ function makeDoughnutChart(bucketNames, monthLimit, spending, remainingMoney, ch
             }
         }
     }
+}
+
+function makeLineChart(lineChartCtnr, lineChartCanvas, dateArr, totalSpentArr, totalOverArr) {
+    lineChartCtnr = new Chart(lineChartCanvas, {
+        type: 'bar',
+            data: {
+            labels: dateArr,
+            datasets: [
+                {
+                label: 'Total Spent for the Month',
+                data: totalSpentArr,
+                borderColor: 'blue',
+                borderWidth: 1,
+                backgroundColor: 'rgba(0, 0, 255, 0.4)',
+                borderSkipped: false
+                },
+                {
+                label: 'Total Spent Over Limit',
+                data: totalOverArr,
+                borderColor: 'red',
+                borderWidth: 1,
+                backgroundColor: 'rgba(255, 0, 0, 0.4)',
+                borderSkipped: false
+                }
+            ]
+
+            },
+            options: {
+                responsive: false,
+                scales: {
+                    x: {
+                        position: 'top',
+                        stacked: true,
+                        ticks: {
+                            color: 'black',
+                            font: {
+                            size: 14
+                            }
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: 'black',
+                            font: {
+                            size: 14
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: 'black',
+                            font: {
+                                size: 14
+                            }
+                        }
+                    },
+                },
+            },
+    });
 }
 
 // Credits

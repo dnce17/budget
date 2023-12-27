@@ -2,6 +2,33 @@
 
 let dates = document.querySelector('.dates');
 let row = document.querySelectorAll('.transaction-row');
+let transactionBtn = document.querySelector('.transaction-history-btn');
+let budgetBtn = document.querySelector('.budget-history-btn');
+
+let transactionCtnr = document.querySelector('.history-ctnr');;
+let lineChartCtnr = document.querySelector('.line-chart-ctnr');;
+let lineChartCanvas = document.querySelector('.line-chart');
+
+document.addEventListener("DOMContentLoaded", () => {
+    // Make Line Chart
+    socket.emit('data for line chart');
+});
+
+transactionBtn.addEventListener('click', () => {
+    if (transactionCtnr.classList.contains('d-none')) {
+        transactionCtnr.classList.remove('d-none');
+        transactionCtnr.classList.add('d-flex');
+        lineChartCtnr.classList.add('hidden');
+    }
+});
+
+budgetBtn.addEventListener('click', () => {
+    if (lineChartCtnr.classList.contains('hidden')) {
+        transactionCtnr.classList.add('d-none');
+        transactionCtnr.classList.remove('d-flex');
+        lineChartCtnr.classList.remove('hidden');
+    }
+});
 
 dates.addEventListener('change', () => {
     // Get the date (e.g. Dec 2023)
@@ -45,4 +72,10 @@ dates.addEventListener('change', () => {
             break;
         }
     }
+});
+
+// Sockets
+socket.on('data for line chart', function(data) {
+    let [dates, totalSpent, totalOver] = [data[0], data[1], data[2]]
+    makeLineChart(lineChartCtnr, lineChartCanvas, dates, totalSpent, totalOver);
 });

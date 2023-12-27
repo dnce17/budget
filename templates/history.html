@@ -5,6 +5,10 @@
 {% endblock %}
 
 {% block main %}
+<div class="history-btn-ctnr">
+    <button class="history-btn transaction-history-btn">Transaction History</button>
+    <button class="history-btn budget-history-btn">Monthly Budget History</button>
+</div>
 <div class="d-flex flex-column align-items-center history-ctnr ctnr shadow">
     <div class="header history-header d-flex flex-column align-items-center">
         <h1 class="text-center">Transaction History</h1>
@@ -46,6 +50,9 @@
                 </tr>
         {% endif %}
     </table>
+</div>
+<div class="line-chart-ctnr shadow hidden">
+    <canvas class="line-chart"></canvas>
 </div>
 
 {% endblock %}

@@ -52,6 +52,10 @@ def index():
         # Save the data and update the database
         data = request.get_json(silent=True)
         if data is not None:
+            abbrev_month = datetime.now().strftime("%b")
+            full_year = datetime.now().strftime("%Y")
+            # abbrev_month = "Sep"
+            # full_year = 2021
             existing = db.execute("SELECT * FROM buckets WHERE owner_id = ?", session["user_id"])
             if existing:
                 # Put old and new bucket names in array
@@ -132,7 +136,10 @@ def index():
                 # Need to check if the table was changed at all first 
                     # Get the bucket names from bucket table and budget_history, then compare them
                 buckets = db.execute("SELECT name FROM buckets WHERE owner_id = ?", session["user_id"])
-                current_budget = db.execute("SELECT bucket_name FROM budget_history WHERE month = ? AND year = ?", datetime.now().strftime("%b"), datetime.now().strftime("%Y"))
+                current_budget = db.execute("SELECT bucket_name FROM budget_history WHERE month = ? AND year = ?", 
+                    abbrev_month, 
+                    full_year
+                )
                 # print(buckets)
                 # print("---")
                 # print(current_budget)
@@ -150,6 +157,8 @@ def index():
                 #     print("new current budget inserted")
                 if len(buckets) == len(current_budget):
                     for i in range(len(buckets)):
+                        print(buckets[i]['name'])
+                        print(current_budget[i]['bucket_name'])
                         if buckets[i]['name'] != current_budget[i]['bucket_name']:
                             print("DIFFERENT")
                             print(buckets[i]['name'])
@@ -160,8 +169,8 @@ def index():
                                 session["user_id"],
                                 i,
                                 current_budget[i]['bucket_name'],
-                                datetime.now().strftime("%b"), 
-                                datetime.now().strftime("%Y")
+                                abbrev_month, 
+                                full_year
                             )
                     print("*updated to the amt of index that buckets and budget_history share")
                 elif len(buckets) < len(current_budget):
@@ -174,8 +183,8 @@ def index():
                                 session["user_id"],
                                 i,
                                 current_budget[i]['bucket_name'],
-                                datetime.now().strftime("%b"), 
-                                datetime.now().strftime("%Y")
+                                abbrev_month, 
+                                full_year
                             )
                             print(buckets[i]['name'] + "is not same as" + current_budget[i]['bucket_name'])
 
@@ -195,16 +204,16 @@ def index():
                                 session["user_id"],
                                 i,
                                 current_budget[i]['bucket_name'],
-                                datetime.now().strftime("%b"), 
-                                datetime.now().strftime("%Y")
+                                abbrev_month, 
+                                full_year
                             )
                     for i in range(len(current_budget), len(buckets)):
                         db.execute("INSERT INTO budget_history (owner_id, index_num, bucket_name, month, year) VALUES (?, ?, ?, ?, ?)", 
                             session["user_id"],
                             i,
                             buckets[i]['name'],
-                            datetime.now().strftime("%b"), 
-                            datetime.now().strftime("%Y")
+                            abbrev_month, 
+                            full_year
                         )
                     print("new buckets added to budget_history")
 
@@ -224,8 +233,8 @@ def index():
                         session["user_id"],
                         index,
                         data[bucket][0],
-                        datetime.now().strftime("%b"), 
-                        datetime.now().strftime("%Y")
+                        abbrev_month, 
+                        full_year
                     )
                     print("new current budget inserted")
 
@@ -658,73 +667,90 @@ def handle_past_budget(data):
 def handle_line_chart():
     dates = db.execute("SELECT DISTINCT month, year FROM budget_history WHERE owner_id = ?", session["user_id"])
     expenses = db.execute("SELECT * FROM history WHERE owner_id = ?", session["user_id"])
+    limits = db.execute("SELECT bucket_name, month_limit, month, year FROM budget_history WHERE owner_id = ?", session["user_id"])
 
-    # dates_list, total_expenses_list = [], []
-    # # expenses_list = []
-    # total = 0
-    # # Get all dates (oldest to most recent)
-    # for date in dates:
-    #     dates_list.append(f"{date['month']} {date['year']}")
-    #     # CHANGE dates_list to {} if use this
-    #     # if f"{date['month']} {date['year']}" not in dates_list:
-    #     #     dates_list[f"{date['month']} {date['year']}"] = []
-    # # print(dates_list)
-    
-
-    # for i in range(len((dates_list))):
-    #     abbrev_month = dates_list[i][:3]
-    #     for expense in expenses:
-    #         num_to_month = datetime.strptime(expense['date'][:2], '%m').strftime('%b')
-    #         # Get total spent for each month year (oldest to most recent)
-    #         if abbrev_month == num_to_month and expense['item_type'] != "Deposit":
-    #             total += expense['amt']
-    #     total_expenses_list.append(f"{total:.2f}")
-    #     total = 0
-    # print(expenses_list)
-
-    # Arr for total negatives (amt spent over budget)
-    # Get month limit to determine remaining
-    # limits = db.execute("SELECT bucket_name, month_limit, month, year FROM budget_history WHERE owner_id = ?", session["user_id"])
-    # over_limit = []
-    # for limit in limits:
-    #     print(f'{limit["bucket_name"]}, {limit["month_limit"]}, {limit["month"]} {limit["year"]}')
-
-    # --- TESTING SOMETHING NEW
-    dates_list = {}
+    dates_dict = {}
     for date in dates:
-        if f"{date['month']} {date['year']}" not in dates_list:
-            dates_list[f"{date['month']} {date['year']}"] = {}
-            dates_list[f"{date['month']} {date['year']}"]["total_spent"] = {}
-            dates_list[f"{date['month']} {date['year']}"]["bucket_spent"] = {}
-            dates_list[f"{date['month']} {date['year']}"]["bucket_remaining"] = {}
-    # print(dates_list)
+        if f"{date['month']} {date['year']}" not in dates_dict:
+            dates_dict[f"{date['month']} {date['year']}"] = {}
+            dates_dict[f"{date['month']} {date['year']}"]["total_spent"] = 0
+            dates_dict[f"{date['month']} {date['year']}"]["total_over"] = 0
+            dates_dict[f"{date['month']} {date['year']}"]["month_limit"] = {}
+            dates_dict[f"{date['month']} {date['year']}"]["bucket_spent"] = {}
+            dates_dict[f"{date['month']} {date['year']}"]["bucket_remaining"] = {}
+            # dates_dict[f"{date['month']} {date['year']}"]["amt_over"] = 0
+    # print(dates_dict)
 
-    total = 0
-    for date in dates_list:
+    for date in dates_dict:
+
+        # Add buckets for the month to needed dicts
+        for bucket in limits:
+            if f'{bucket["month"]} {bucket["year"]}' == date:
+                if bucket["bucket_name"] not in dates_dict[date]["bucket_spent"]:
+                    dates_dict[date]["bucket_spent"][bucket["bucket_name"]] = 0
+                    dates_dict[date]["month_limit"][bucket["bucket_name"]] = 0
+                    dates_dict[date]["bucket_remaining"][bucket["bucket_name"]] = 0
+
         for expense in expenses:
             # Input bucket names of only 1 month year into dict to start
             month_yr = f'{datetime.strptime(expense["date"][:2], "%m").strftime("%b")} {datetime.strptime(expense["date"][-2:], "%y").strftime("%Y")}'
+            bucket_name = expense["bucket"]
             if month_yr == date:
-                bucket_name = expense["bucket"]
+
+                pprint.pprint(dates_dict)
+
                 # Get amt spent for each bucket of a month (bucket_spent)
-                if expense["bucket"] not in dates_list[date]["bucket_spent"]:
-                    # dates_list[date][bucket_name] = 0
-                    dates_list[date]["bucket_spent"][bucket_name] = 0
+                # print(expense["amt"])
                 if expense["item_type"] != "Deposit":
-                    # dates_list[date][bucket_name] += expense["amt"]
-                    dates_list[date]["bucket_spent"][bucket_name] += expense["amt"]
-    pprint.pprint(dates_list)
-            # print(buckets_for_month)
-            # else:
-            #     if 
-
-            # month_yr = f'{datetime.strptime(expense["date"][:2], "%m").strftime("%b")} {datetime.strptime(expense["date"][-2:], "%y").strftime("%Y")}'
-            # if (date == month_yr):
-            #     print(date)
-            #     bucket_expense += expense['amt']
+                    print(f'{bucket_name} {expense["amt"]}')
+                    
+                    # The names in budget_history might not match history if user changed names in middle of month
+                    try:
+                        dates_dict[date]["bucket_spent"][bucket_name] += expense["amt"]
+                    except:
+                        pass
 
 
-    emit("data for line chart", dates_list)
+                    # Get the total spent for that month
+                    dates_dict[date]["total_spent"] += expense['amt']
+            
+            # Get month limit for each bucket of a month
+            for limit in limits:
+                if f'{limit["month"]} {limit["year"]}' == date:
+                    if limit["bucket_name"] in dates_dict[date]["month_limit"]:
+                        # print(limit["month_limit"])
+                        dates_dict[date]["month_limit"][limit["bucket_name"]] = limit["month_limit"]
+    
+        dates_dict[date]["total_spent"] = float(f'{dates_dict[date]["total_spent"]:.2f}')
+        # pprint.pprint(dates_dict)
+
+    # Calculate remaining
+    for date in dates_dict:
+        for bucket in dates_dict[date]["month_limit"]:
+            if dates_dict[date]["month_limit"][bucket] != '' and dates_dict[date]["bucket_spent"][bucket] != '':
+                if dates_dict[date]["month_limit"][bucket] is not None:
+                    remaining = dates_dict[date]["month_limit"][bucket] - dates_dict[date]["bucket_spent"][bucket]
+                    dates_dict[date]["bucket_remaining"][bucket] = remaining
+
+                    # Calculate total over budget
+                    if remaining < 0:
+                        dates_dict[date]["total_over"] += remaining
+
+    # Data to send over
+    date_list, total_spent, total_over = [], [], []
+    for date in dates_dict:
+        date_list.append(date)
+        total_spent.append(dates_dict[date]["total_spent"])
+        total_over.append(dates_dict[date]["total_over"])
+    
+    # print(date_list)
+    # print(total_spent)
+    # print(total_over)
+
+    pprint.pprint(dates_dict)
+
+
+    emit("data for line chart", [date_list, total_spent, total_over])
 
 if __name__ == '__main__':
     socketio.run(app)

@@ -18,6 +18,7 @@
 let saveBtn = document.querySelector('.save-btn');
 let editBtn = document.querySelector('.edit-btn');
 let cancelBtn = document.querySelector('.cancel-btn');
+let graphBtn = document.querySelector('.graph-btn');
 
 let layerOneBtns = document.querySelector('.first-layer-btns');
 let layerTwoBtns = document.querySelector('.second-layer-btns');
@@ -77,7 +78,7 @@ function addBtnEvts() {
             data["item" + String(itemNum)] = [bucketInputs[i].value, bucketInputs[i + 1].value];
             itemNum++;
         }
-        console.log(data)
+        // console.log(data)
         sendToServer("/monthly", data);
 
         if (chartCtnr.children.length == 0) {
@@ -123,17 +124,15 @@ function addBtnEvts() {
                 spending[i].value = '--';
             }
         }
-
     });
 
-    // TO ADD: make it only work if the dropdown menu value is current
     editBtn.addEventListener('click', (e) => {
         e.preventDefault();
         let limits = document.querySelectorAll('.limit');
 
         layerOneBtns.classList.toggle('d-none');
         layerTwoBtns.classList.toggle('d-none');
-        toggleBucketInputs(monthLimit, false);
+        toggleBucketInputs(limits, false);
 
         for (let i = 0; i < limits.length; i++) {
             limits[i].value = limits[i].value.replace(',', '');
@@ -153,7 +152,6 @@ function addBtnEvts() {
 addBtnEvts();
 
 
-// TEST
 dates.addEventListener('change', (e) => {
 
     // Send month + yr to server to get desired budget history of that month
@@ -264,8 +262,6 @@ socket.on('get budget of date', function(data) {
         // console.log(tr);
     }
 
-    // DO LATER: Remove buttons if current data shown is not this month's data
-
     // Create doughnut chart
     if (emptyLimit != data['past_budget'].length) {
         const chartCtnr = document.querySelector('.donut-chart-ctnr');
@@ -286,27 +282,3 @@ socket.on('get budget of date', function(data) {
 // https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
 // Format to dollar and comma in number in thousands - https://stackoverflow.com/questions/149055/how-to-format-numbers-as-currency-strings
 // num to abbrev month - https://www.codingbeautydev.com/blog/javascript-get-month-short-name
-
-
-const lineChartCanvas = document.querySelector('.line-chart');
-socket.emit('data for line chart',);
-
-socket.on('data for line chart', function(data) {
-    let lineChart = new Chart(lineChartCanvas, {
-        type: 'line',
-            data: {
-            labels: data,
-            datasets: [{
-                label: "online tutorial subjects",
-                data: [20, 40, 30, 35, 30, 20],
-                backgroundColor: ['yellow', 'aqua', 'pink', 'lightgreen', 'lightblue', 'gold'],
-                borderColor: ['black'],
-                borderWidth: 2,
-                pointRadius: 5,
-            }],
-            },
-            options: {
-                responsive: false,
-        },
-    });
-});
