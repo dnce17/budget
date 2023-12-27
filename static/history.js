@@ -1,5 +1,3 @@
-// displayNameMoney();
-
 let dates = document.querySelector('.dates');
 let row = document.querySelectorAll('.transaction-row');
 let transactionBtn = document.querySelector('.transaction-history-btn');

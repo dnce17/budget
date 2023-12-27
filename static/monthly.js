@@ -1,5 +1,3 @@
-// displayNameMoney();
-
 // TO DO LATER - 
 // DONE 1) if user ONLY delete a row from index and nothing else (MAYBE), save the monthly table in budget history
     // b/c monthly table will be of before delete
@@ -7,9 +5,7 @@
     // Off top of my head, i believe you can just paste monthly code for saving and updating into index
 // DONE: 2) ERROR: when going back to current when current table month limit has not been established
 // DONE 3) Remove the edit button when going to noncurrent budget history
-// DONE 4)  edit is clicked and return once saved
-
-// last feature = line graph that show total spent and also amt negative =double line graph
+// DONE 4) edit is clicked and return once saved
 
 // Minor
 // 1) formatting in "remaining" column when remaining is exactly 0 
@@ -78,7 +74,6 @@ function addBtnEvts() {
             data["item" + String(itemNum)] = [bucketInputs[i].value, bucketInputs[i + 1].value];
             itemNum++;
         }
-        // console.log(data)
         sendToServer("/monthly", data);
 
         if (chartCtnr.children.length == 0) {
@@ -151,7 +146,6 @@ function addBtnEvts() {
 }
 addBtnEvts();
 
-
 dates.addEventListener('change', (e) => {
 
     // Send month + yr to server to get desired budget history of that month
@@ -193,7 +187,6 @@ socket.on('get budget of date', function(data) {
             emptyLimit++
         }
     }
-    // console.log(emptyLimit);
 
     let table = document.querySelector('.bucket-body');
     let donutCtnr = document.querySelector('.donut-chart-ctnr');
@@ -208,9 +201,7 @@ socket.on('get budget of date', function(data) {
 
     // Determines the amt of rows (NOT amt of columns)
     for (let bucket of data['past_budget']) {
-        // console.log(bucket)
-        
-        // Arbitrary: say there is 5 rows
+        // Make row
         let tr = document.createElement('tr');
         let columnAmt = 4;
         for (let i = 0; i < columnAmt; i++) {
@@ -221,9 +212,7 @@ socket.on('get budget of date', function(data) {
                 case 0:
                     input = createInput(['bucket-input', 'bucket-name', 'saved'], 'text', 'bucket', bucket['bucket_name']);
                     break;
-                case 1:
-                    // input = createInput(['bucket-input', 'limit', 'saved', 'int-only'], 'text', '$' + thousandsFormat(bucket['month_limit']));
-                    
+                case 1:                    
                     // Ensure not null or else rest of code will not work
                     if (bucket['month_limit'] == null) {
                         bucket['month_limit'] = '';
@@ -236,7 +225,6 @@ socket.on('get budget of date', function(data) {
                 case 2:
                     for (let name in data['expenses']) {
                         if (name == bucket['bucket_name']) {
-                            // input = createInput(['spending', 'saved'], 'text', dollarFormat(data['expenses'][name]));
                             input = bucket['month_limit'].length != 0 
                                     ? createInput(['spending', 'saved'], 'text', 'spending', dollarFormat(data['expenses'][name]))
                                     : createInput(['spending', 'saved'], 'text', 'spending');
@@ -247,7 +235,6 @@ socket.on('get budget of date', function(data) {
                 case 3:
                     for (let name in data['expenses']) {
                         if (name == bucket['bucket_name']) {
-                            // input = createInput(['remaining', 'saved'], 'text', dollarFormat(bucket['month_limit'] - data['expenses'][name]));
                             input = bucket['month_limit'].length != 0
                                     ? createInput(['remaining', 'saved'], 'text', 'remaining', dollarFormat(bucket['month_limit'] - data['expenses'][name]))
                                     : createInput(['remaining', 'saved'], 'text', 'remaining');
@@ -259,7 +246,6 @@ socket.on('get budget of date', function(data) {
             tr.appendChild(td);
             table.appendChild(tr);
         }
-        // console.log(tr);
     }
 
     // Create doughnut chart
@@ -269,10 +255,6 @@ socket.on('get budget of date', function(data) {
         let remainingMoney = document.querySelectorAll('.remaining');
         spending = document.querySelectorAll('.spending');
         monthLimit = document.querySelectorAll('.limit');
-        // console.log(chartCtnr);
-        // console.log(bucketNames);
-        // console.log(remainingMoney);
-        // console.log(JSON.stringify(data['expenses']));
         makeDoughnutChart(bucketNames, monthLimit, spending, remainingMoney, chartCtnr, JSON.parse(JSON.stringify(data['expenses'])));
     }
 });

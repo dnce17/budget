@@ -1,8 +1,5 @@
 # Started 10/17/23
 
-# CHECKPOINT 12/13/23
-# I changed dates to May 2022 and adding in other dates to get ready to test the budget history dropdown
-
 from flask import Flask, redirect, render_template, request, session, g, flash, jsonify
 from flask_session import Session
 from cs50 import SQL
@@ -27,14 +24,13 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
+# Connect database
+db = SQL("sqlite:///budget.db")
+
 # Custom filter
 @app.template_filter("hour_min")
 def hour_min_filter(value, format="%I:%M %p"):
     return datetime.strptime(value, '%I:%M:%S:%f %p').strftime("%I:%M %p")
-
-
-# Connect database
-db = SQL("sqlite:///budget.db")
 
 
 @app.after_request
@@ -55,8 +51,7 @@ def index():
         if data is not None:
             abbrev_month = datetime.now().strftime("%b")
             full_year = datetime.now().strftime("%Y")
-            # abbrev_month = "Sep"
-            # full_year = 2021
+
             existing = db.execute("SELECT * FROM buckets WHERE owner_id = ?", session["user_id"])
             if existing:
                 # Put old and new bucket names in array
@@ -68,17 +63,9 @@ def index():
                 for item in data:
                     new_buckets.append(data[item][0])
                     new_allocations.append(int(data[item][1]))
-                # print("----")
-                # print(f"Existing bucket: {existing_buckets}")
-                # print(f"New bucket: {new_buckets}")
 
-                # ISSUE: if you just switch two names around without both being different, it leads to matching issue
                 def update_bucket_names(existing_buckets, new_buckets, index):
                     if existing_buckets[index] != new_buckets[index]:
-                        # print("----")
-                        # print("DIFFERENCES")
-                        # print(f"Existing bucket: {existing_buckets[index]}, index {index}")
-                        # print(f"New bucket: {new_buckets[index]}, index {index}")
                         db.execute("UPDATE buckets SET name = ?, month_limit = NULL WHERE owner_id = ? AND name = ? AND index_num = ?", 
                             new_buckets[index], 
                             session["user_id"], 
@@ -102,7 +89,6 @@ def index():
                     for i in range(len(existing_buckets)): 
                         update_bucket_names(existing_buckets, new_buckets, i)
                         update_allocations(existing_buckets, new_buckets, old_allocations, new_allocations, i)
-                    # print("same amt of buckets")
                 elif len(existing_buckets) < len(new_buckets):
                     # Check the index that both old and new buckets both share (and not out of range)
                     for i in range(len(existing_buckets)): 
@@ -117,7 +103,6 @@ def index():
                             new_buckets[i], 
                             new_allocations[i]
                         )
-                    # print("new data has been inserted")
                 elif len(existing_buckets) > len(new_buckets):
                     for i in range(len(new_buckets)):
                         update_bucket_names(existing_buckets, new_buckets, i)
@@ -131,39 +116,15 @@ def index():
                             i
                         )
 
-                # CONSTRUCTION: Update budget_history table (in case user does not go back to monthly budget to change themselves)
-                # WILL PUT INTO A FUNC AND CALL IT
-                # Update the budget_history if 
-                # Need to check if the table was changed at all first 
-                    # Get the bucket names from bucket table and budget_history, then compare them
+                # Update budget_history table (in case user does not go back to monthly budget to change themselves)
                 buckets = db.execute("SELECT name FROM buckets WHERE owner_id = ?", session["user_id"])
                 current_budget = db.execute("SELECT bucket_name FROM budget_history WHERE month = ? AND year = ?", 
                     abbrev_month, 
                     full_year
                 )
-                # print(buckets)
-                # print("---")
-                # print(current_budget)
-
-                # Just insert if bucket had not been made yet = WRONG - this should go in the else this if this "if existing"
-                # if len(current_budget) == 0:
-                #     for i in range(len(buckets)):
-                #         db.execute("INSERT INTO budget_history (owner_id, index_num, bucket_name, month, year) VALUES (?, ?, ?, ?, ?)", 
-                #             session["user_id"],
-                #             i,
-                #             buckets[i]['name'],
-                #             datetime.now().strftime("%b"), 
-                #             datetime.now().strftime("%Y")
-                #         )
-                #     print("new current budget inserted")
                 if len(buckets) == len(current_budget):
                     for i in range(len(buckets)):
-                        print(buckets[i]['name'])
-                        print(current_budget[i]['bucket_name'])
                         if buckets[i]['name'] != current_budget[i]['bucket_name']:
-                            print("DIFFERENT")
-                            print(buckets[i]['name'])
-                            print(i)
                             db.execute("UPDATE budget_history SET bucket_name = ?, month_limit = ? WHERE owner_id = ? AND index_num = ? AND bucket_name = ? AND month = ? AND year = ?",
                                 buckets[i]['name'],
                                 '',
@@ -173,7 +134,6 @@ def index():
                                 abbrev_month, 
                                 full_year
                             )
-                    print("*updated to the amt of index that buckets and budget_history share")
                 elif len(buckets) < len(current_budget):
                     # Check the index that both old and new buckets both share (and not out of range)
                     for i in range(len(buckets)):
@@ -187,7 +147,6 @@ def index():
                                 abbrev_month, 
                                 full_year
                             )
-                            print(buckets[i]['name'] + "is not same as" + current_budget[i]['bucket_name'])
 
                     for i in range(len(buckets), len(current_budget)):
                         db.execute("DELETE FROM budget_history WHERE owner_id = ? AND bucket_name = ? AND index_num = ?", 
@@ -195,7 +154,6 @@ def index():
                             current_budget[i]['bucket_name'],
                             i
                         )
-                    print("budget_history excess buckets deleted")
                 elif len(buckets) > len(current_budget):
                     for i in range(len(current_budget)):
                         if buckets[i]['name'] != current_budget[i]['bucket_name']:
@@ -216,8 +174,6 @@ def index():
                             abbrev_month, 
                             full_year
                         )
-                    print("new buckets added to budget_history")
-
             else:
                 data_to_list = list(data.items())
                 index = 0
@@ -237,11 +193,8 @@ def index():
                         abbrev_month, 
                         full_year
                     )
-                    print("new current budget inserted")
 
                     index += 1
-            
-                
                     
         return redirect("/")
     else:
@@ -260,21 +213,8 @@ def index():
 @app.route("/monthly", methods=["GET", "POST"])
 @login_required
 def monthly():
-
-    # ADDING FAKE DATA FOR TESTING
-    # db.execute("INSERT INTO budget_history (owner_id, index_num, bucket_name, month_limit, month, year) VALUES (?, ?, ?, ?, ?, ?)", 
-    #     2, 
-    #     3, 
-    #     "Enjoyment", 
-    #     50,
-    #     "May", 
-    #     2020
-    # )
-
-
     if request.method == "POST":
         data = request.get_json(silent=True)
-        # print(data)
 
         # Add to/Update the month_limit 
         if data is not None:
@@ -288,9 +228,7 @@ def monthly():
         # Add to or update the budget history
         if data is not None:
             current_abbrev_month = datetime.now().strftime("%b")
-            # current_abbrev_month = "Sep"
             current_full_yr = datetime.now().strftime("%Y")
-            # current_full_yr = 2021
             recent_history = db.execute("SELECT month, year FROM budget_history WHERE month = ? AND year = ?", current_abbrev_month, current_full_yr)
             
             # If history for current month exist, delete it and insert new one 
@@ -314,7 +252,6 @@ def monthly():
                         current_full_yr
                     )
                     index += 1
-                print("budget history for this month exist. Old has been deleted and new inserted")
             # If not, just insert
             # This actually is not needed since this budget_history will be made from making bucket in 
             # index, but might be needed in future for something
@@ -331,7 +268,6 @@ def monthly():
                         current_full_yr
                     )
                     index += 1
-                print("this month's budget doesn't exist, so new budget has been inserted")
 
         return redirect("/monthly")
 
@@ -343,8 +279,6 @@ def monthly():
         transactions = db.execute("SELECT * FROM history WHERE owner_id = ?", session["user_id"])
         current_month = datetime.now().strftime("%m")
         current_yr = datetime.now().strftime("%y")
-        # current_month = "09"
-        # current_yr = "21"
         
         expenses = {}
         for bucket in existing:
@@ -370,7 +304,6 @@ def monthly():
             if date not in past_dates and history['month'] != datetime.now().strftime("%b") and history['year'] != datetime.now().strftime("%Y"): 
                 past_dates.append(f"{history['month']} {str(history['year'])}")
         past_dates.reverse()
-        # print(past_dates)
         
         if existing:
             return render_template("monthly.html", 
@@ -412,7 +345,6 @@ def login():
         # Save username and balance to use for display
         session["username"] = db.execute("SELECT username FROM users WHERE id = ?", session["user_id"])[0]["username"]
         session["balance"] = usd(db.execute("SELECT money FROM users WHERE id = ?", session["user_id"])[0]["money"])
-
 
         # Send username + money for JS to display on all pages
         money = db.execute(
@@ -480,23 +412,17 @@ def transaction():
                     money,
                     new_total,
                     datetime.now(tz_NY).strftime("%m/%d/%y"),
-                    # datetime.now(tz_NY).strftime("05/11/20"),
-                    # datetime.now(tz_NY).strftime("%I:%M %p")
                     datetime.now(tz_NY).strftime('%I:%M:%S:%f')[:-4] + ' ' + datetime.now(tz_NY).strftime('%p')
                 )
 
                 # Update display of user balance
                 session["balance"] = usd(db.execute("SELECT money FROM users WHERE id = ?", session["user_id"])[0]["money"])
-                # OLD
-                # file = open("static/data.json", "w")
-                # username = db.execute("SELECT username FROM users WHERE id = ?", session["user_id"])[0]["username"]
-                # money = db.execute("SELECT money FROM users WHERE id = ?", session["user_id"])[0]["money"]
-                # file.write(f"{username.capitalize()}, {usd(money)}")
-                
+
                 return redirect("/transaction")
             else:
                 flash("*Value must be integer or decimals only", "error_one")
                 return redirect("/transaction")
+
         # Submit a transaction (reduce balance)
         elif request.form.get("submit-transaction-btn"):
             if not request.form.get("buckets") or not request.form.get("transaction"):
@@ -519,18 +445,12 @@ def transaction():
                 request.form.get("transaction"),
                 format(new_balance, ".2f"),
                 datetime.now(tz_NY).strftime("%m/%d/%y"),
-                # datetime.now(tz_NY).strftime("09/06/21"),
-                # datetime.now(tz_NY).strftime("%I:%M %p")
                 datetime.now(tz_NY).strftime('%I:%M:%S:%f')[:-4] + ' ' + datetime.now(tz_NY).strftime('%p')
-                # datetime.now(tz_NY).strftime("05:01:43:35 AM")
             )
 
             db.execute("UPDATE users SET money = ? WHERE id = ?", new_balance, session["user_id"])
 
             session["balance"] = usd(db.execute("SELECT money FROM users WHERE id = ?", session["user_id"])[0]["money"])
-            # file = open("static/data.json", "w")
-            # username = db.execute("SELECT username FROM users WHERE id = ?", session["user_id"])[0]["username"]
-            # file.write(f"{username.capitalize()}, {usd(new_balance)}")
 
             return redirect("/transaction")
 
@@ -547,28 +467,7 @@ def transaction():
 @login_required
 def history():
     # Reversed to arrange dates from latest to oldest
-    # transactions = reversed(db.execute("SELECT * FROM history WHERE owner_id = ?", session["user_id"]))
     transactions = db.execute("SELECT * FROM history WHERE owner_id = ?", session["user_id"])
-    # for transaction in transactions:
-    #     # Convert 12 to 24 hr time to sort
-    #     in_time = datetime.strptime(transaction["time"], "%I:%M %p")
-    #     out_time = datetime.strftime(in_time, "%H:%M")
-    #     print(out_time)
-
-    # Note: This is technically unnecessary as long as user doesn't alter their system date and time somehow
-    # transactions.sort(
-    #     key=lambda d: (
-    #             d["date"][-2:], 
-    #             d["date"][:2], 
-    #             d["date"][3:5], 
-    #             # d["time"]
-    #             datetime.strftime(datetime.strptime(d["time"], "%I:%M %p"), "%H:%M")
-    #             # Time may also be the same, so milliseconds should be added
-    #         ), 
-    #         reverse=True
-    # )
-    # for date in transactions:
-    #     print(f"{date['date']} {date['time']}")
     transactions.reverse()
 
     dates = db.execute("SELECT date FROM history WHERE owner_id = ?", session["user_id"])
@@ -601,10 +500,10 @@ def logout():
     session.clear()
     return redirect("/")
 
+# Sockets
 @socketio.on("save empty current data")
 def handle_save_empty_current_data(data):
-    # print(data)
-    # Save current data only if empty should user go back to "Current" data with dropdown
+    # Save current data only if empty in case user go back to "Current" data with dropdown
     recent_history = db.execute("SELECT month, year FROM budget_history WHERE month = ? AND year = ?", datetime.now().strftime("%b"), datetime.now().strftime("%Y"))
     if not recent_history:
         for bucket in data:
@@ -626,13 +525,8 @@ def handle_past_budget(data):
 
     # Get the budget of the desired date
     month, year = data[0], data[1]
-    # print(month)
-    # print(year)
     past_budget = db.execute("SELECT * FROM budget_history WHERE owner_id = ? AND month = ? AND year = ?", session["user_id"], month, year)
-    # print("PAST")
-    # print(past_budget)
 
-    # CHECKPOINT
     # Get the expenses calculated from that month's history
     transactions = db.execute("SELECT * FROM history WHERE owner_id = ? AND date LIKE ? AND date LIKE ?", 
         session["user_id"],
@@ -640,10 +534,6 @@ def handle_past_budget(data):
         f"{datetime.strptime(month, '%b').strftime('%m')}%",
         f"%{year[-2:]}"
     )
-    # print("TRANSACTION")
-    # print(f"{datetime.strptime(month, '%b').month}%")
-    # print(f"%{year[-2:]}")
-    # print(transactions)
         
     expenses = {}
     for bucket in past_budget:
@@ -652,14 +542,11 @@ def handle_past_budget(data):
     for transaction in transactions:
         if transaction["item_type"] != "Deposit" and transaction["bucket"] in expenses:
             expenses[transaction["bucket"]][0] += transaction["amt"]
-    # print("EXPENSE")
-    # print(expenses)
 
     data = {
         "past_budget": past_budget,
         "expenses": expenses
     }
-    # print(data)
 
     emit("get budget of date", data)
 
@@ -679,11 +566,8 @@ def handle_line_chart():
             dates_dict[f"{date['month']} {date['year']}"]["month_limit"] = {}
             dates_dict[f"{date['month']} {date['year']}"]["bucket_spent"] = {}
             dates_dict[f"{date['month']} {date['year']}"]["bucket_remaining"] = {}
-            # dates_dict[f"{date['month']} {date['year']}"]["amt_over"] = 0
-    # print(dates_dict)
 
     for date in dates_dict:
-
         # Add buckets for the month to needed dicts
         for bucket in limits:
             if f'{bucket["month"]} {bucket["year"]}' == date:
@@ -697,20 +581,13 @@ def handle_line_chart():
             month_yr = f'{datetime.strptime(expense["date"][:2], "%m").strftime("%b")} {datetime.strptime(expense["date"][-2:], "%y").strftime("%Y")}'
             bucket_name = expense["bucket"]
             if month_yr == date:
-
-                pprint.pprint(dates_dict)
-
                 # Get amt spent for each bucket of a month (bucket_spent)
-                # print(expense["amt"])
                 if expense["item_type"] != "Deposit":
-                    print(f'{bucket_name} {expense["amt"]}')
-                    
-                    # The names in budget_history might not match history if user changed names in middle of month
+                    # The names in budget_history might not match history if user changed names in the middle of the month
                     try:
                         dates_dict[date]["bucket_spent"][bucket_name] += expense["amt"]
                     except:
                         pass
-
 
                     # Get the total spent for that month
                     dates_dict[date]["total_spent"] += expense['amt']
@@ -719,11 +596,9 @@ def handle_line_chart():
             for limit in limits:
                 if f'{limit["month"]} {limit["year"]}' == date:
                     if limit["bucket_name"] in dates_dict[date]["month_limit"]:
-                        # print(limit["month_limit"])
                         dates_dict[date]["month_limit"][limit["bucket_name"]] = limit["month_limit"]
     
         dates_dict[date]["total_spent"] = float(f'{dates_dict[date]["total_spent"]:.2f}')
-        # pprint.pprint(dates_dict)
 
     # Calculate remaining
     for date in dates_dict:
@@ -743,13 +618,8 @@ def handle_line_chart():
         date_list.append(date)
         total_spent.append(dates_dict[date]["total_spent"])
         total_over.append(dates_dict[date]["total_over"])
-    
-    # print(date_list)
-    # print(total_spent)
-    # print(total_over)
 
-    pprint.pprint(dates_dict)
-
+    # pprint.pprint(dates_dict)
 
     emit("data for line chart", [date_list, total_spent, total_over])
 
@@ -771,8 +641,6 @@ if __name__ == '__main__':
     # If you're using Python 3 in your Flask App you need pip3 to install compatible parts.
 # https://stackoverflow.com/questions/33948966/flashing-2-groups-of-messages-in-2-different-places-using-flask
 # Convert num month to abbrev month - https://stackoverflow.com/questions/6557553/get-month-name-from-number
-
-# May want to consider flasksocket.io cause it does server to client and vice versa (I think)
 # Getting start with flasksocket.io
     # https://stackoverflow.com/questions/42988907/how-do-you-send-messages-from-flask-server-python-to-html-client
     # https://www.youtube.com/watch?v=AMp6hlA8xKA&t=4s

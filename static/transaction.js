@@ -1,7 +1,3 @@
-// displayNameMoney();
-
-// TODO: Add the int_only func to the input as needed
-
 // Prevent user from typing more than two decimal places
 let inputs = document.querySelectorAll('.two-decimal');
 inputs.forEach((input) => {

@@ -84,9 +84,6 @@ function thousandsFormat(amt) {
 
 function createInput(classArr, inputType, inputName, inputVal='') {
     let input = document.createElement('input');
-    // console.log(inputVal.replace('$', '')[0]);
-    // if (inputVal.replace('$', '')[0] == '0') {
-    // }
 
     for (let className of classArr) {
         input.classList.add(className);
@@ -157,7 +154,8 @@ function makeChart(labelNames, labelAllocations, chartCanvas) {
     return chart;
 }
 
-// NOTE: this function does more than 1 thing = BAD!!
+// For future reference: this function does more than 1 thing, best to split it up in future projects
+// or if you come back to this project
 function makeDoughnutChart(bucketNames, monthLimit, spending, remainingMoney, chartCtnr, historyJSON) {
     // Calculate amt left 
     for (let i = 0; i < remainingMoney.length; i++) {

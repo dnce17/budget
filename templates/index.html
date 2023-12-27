@@ -37,8 +37,6 @@
 						<tr>
 							<td><input class="bucket-input bucket-name saved existing" type="text" name="bucket" placeholder="Enter bucket name" value="{{ bucket.name }}" readonly></td>
 							<td><input class="bucket-input allocation saved existing int-only" type="text" inputmode="numeric" name="allocation" value="{{ bucket.percent_allocation }}%" readonly></td>
-							<!-- <td><input class="for-use saved" type="text" name="for-use" placeholder="--" value="{{ usd((bucket.percent_allocation / 100) * money) }}" readonly></td>
-							<td class="no-border delete-ctnr hidden"><input class="delete" type="button" value="-"></td> -->
 							<td>
 								<input class="for-use saved" type="text" name="for-use" placeholder="--" value="{{ usd((bucket.percent_allocation / 100) * money) }}" readonly>
 								<span class="no-border delete-ctnr hidden">
