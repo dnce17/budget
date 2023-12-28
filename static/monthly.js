@@ -1,16 +1,3 @@
-// TO DO LATER - 
-// DONE 1) if user ONLY delete a row from index and nothing else (MAYBE), save the monthly table in budget history
-    // b/c monthly table will be of before delete
-    // NOTE: there will likely be other considerations needed
-    // Off top of my head, i believe you can just paste monthly code for saving and updating into index
-// DONE: 2) ERROR: when going back to current when current table month limit has not been established
-// DONE 3) Remove the edit button when going to noncurrent budget history
-// DONE 4) edit is clicked and return once saved
-
-// Minor
-// 1) formatting in "remaining" column when remaining is exactly 0 
-// 2) last row of history table when filtering
- 
 let saveBtn = document.querySelector('.save-btn');
 let editBtn = document.querySelector('.edit-btn');
 let cancelBtn = document.querySelector('.cancel-btn');

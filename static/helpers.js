@@ -263,7 +263,8 @@ function makeDoughnutChart(bucketNames, monthLimit, spending, remainingMoney, ch
             if (+remainingMoney[i].value < 0) {
                 remainingMoney[i].value = '-' + dollarFormat(remainingMoney[i].value.replace('-', ''));
             } 
-            else if (remainingMoney[i].value > 0) {
+            // -1 b/c remaining might be 0 left
+            else if (remainingMoney[i].value > -1) {
                 remainingMoney[i].value = dollarFormat(remainingMoney[i].value);
             }
         }

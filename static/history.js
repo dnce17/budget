@@ -62,12 +62,24 @@ dates.addEventListener('change', () => {
         }
     }
 
-    // Make the last row that has no "hidden" class has the border-radius
+    // Make the last row with no "hidden" class have the border-radius
     // Get the first instance of row that is not hidden, counting from bottom up
-    for (let i = row.length - 1; i >= 0; i--) {     
+    for (let i = row.length - 1; i >= 0; i--) { 
+        // Reset everything as precautionary
+        if (row[i].children[0].classList.contains('bottom-left')) {
+            row[i].children[0].classList.remove('bottom-left');
+            row[i].children[row[i].children.length - 1].classList.remove('bottom-right');
+        }
+
         if (!row[i].classList.contains('hidden')) {
-            // UNDER CONSTRUCTION: need to add style used for last row of tables
-            break;
+            // Only add bottom left right formatting for the "last" row w/o hidden class
+            if (!row[i].children[0].classList.contains('bottom-left')) {
+                // console.log(row[i].children[0]);
+                // console.log(row[i].children[row[i].children.length - 1]);
+                row[i].children[0].classList.add('bottom-left');
+                row[i].children[row[i].children.length - 1].classList.add('bottom-right');
+                index = i;
+            }
         }
     }
 });

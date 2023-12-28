@@ -21,6 +21,16 @@ table tr:last-child td:last-child {
     border-bottom-right-radius: 1rem;
 }
 
+.bottom-left {
+    border-bottom: none;
+    border-bottom-left-radius: 1rem;
+}
+
+.bottom-right {
+    border-bottom: none;
+    border-bottom-right-radius: 1rem;
+}
+
 input {
     background-color: rgba(248, 249, 250, 255);
     border-style: solid;
