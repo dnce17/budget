@@ -1,7 +1,6 @@
 # YOUR PROJECT TITLE
-#### Video Demo:  <URL HERE>
-#### Description:
-TODO
+#### Video Demo:  https://www.youtube.com/watch?v=CYnscWEVpo8
+#### Description: Budget your money and track spendings
 
 # Purpose of My Project
 My project is a money budget tracker. The user first decides on "money buckets" (e.g. Basic Needs, Entertainment, Savings), then they allocate a certain percentage of their balance to them and also a monthly budget for each bucket. For example, if the user has buckets consisting of Basic Needs, Entertainment, and Savings, they may decide to allocate 15%, 65%, and 20% of their balance to those buckets, respectively. In terms of monthly budget, the user may decide to spend no more than $250/month on Basic Needs and $500/month on Savings. 
