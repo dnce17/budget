@@ -7,7 +7,7 @@ db = con.cursor()
 #                                 id INTEGER NOT NULL,
 #                                 username TEXT NOT NULL,
 #                                 hash TEXT NOT NULL,
-#                                 money NUMERIC,
+#                                 money NUMERIC DEFAULT "0",
 #                                 PRIMARY KEY(id)
 #                               )"""
 #                           )
@@ -24,16 +24,6 @@ db = con.cursor()
 #                               )"""
 #                           )
 
-# spendings = db.execute("""CREATE TABLE spendings (
-#                                 id INTEGER NOT NULL,
-#                                 owner_id INTEGER NOT NULL,
-#                                 name TEXT NOT NULL,
-#                                 month_limit NUMERIC,
-#                                 FOREIGN KEY(owner_id) REFERENCES users(id),
-#                                 FOREIGN KEY(name) REFERENCES buckets(name),
-#                                 PRIMARY KEY(id)
-#                               )"""
-#                           )
 
 # create_history = db.execute("""CREATE TABLE history (
 #                                 id INTEGER NOT NULL,

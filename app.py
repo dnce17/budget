@@ -1,5 +1,3 @@
-# Started 10/17/23
-
 from flask import Flask, redirect, render_template, request, session, g, flash, jsonify
 from flask_session import Session
 from cs50 import SQL
@@ -647,6 +645,5 @@ if __name__ == '__main__':
     # https://flask-socketio.readthedocs.io/en/latest/getting_started.html
 # Convert b/w month name and number - https://www.adamsmith.haus/python/answers/how-to-convert-between-month-name-and-month-number-in-python
 # Convert AM/PM time to 24 hr format consisely - https://stackoverflow.com/questions/19229190/how-to-convert-am-pm-timestmap-into-24hs-format-in-python
-
 # Custom filter - https://www.youtube.com/watch?v=sZl-H6GkHrk
     
