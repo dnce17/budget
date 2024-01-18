@@ -7,6 +7,7 @@ from datetime import datetime
 from pytz import timezone
 from flask_socketio import SocketIO, emit
 import pprint
+import calendar
 
 from helpers import login_required, is_float, usd, thousands
 
@@ -199,6 +200,44 @@ def index():
         # Load username and balance
         username = db.execute("SELECT username FROM users WHERE id = ?", session["user_id"])[0]["username"].capitalize()
         money = db.execute("SELECT money FROM users WHERE id = ?", session["user_id"])[0]["money"]
+
+        # If new month today, add same buckets to budget_history but no limit set
+        abbrev_month, full_yr = datetime.now().strftime("%b"), datetime.now().strftime("%Y")
+        new_month = db.execute("SELECT * FROM budget_history WHERE owner_id = ? AND month = ? AND year = ?", 
+            session["user_id"], 
+            abbrev_month, 
+            full_yr
+        )
+
+        now = datetime.now()
+        last_month = (now.month - 1) if now.month > 1 else 12
+        last_budget = None
+        if now.month == 1:
+            last_budget = db.execute("SELECT bucket_name, month_limit FROM budget_history WHERE owner_id = ? AND month = ? AND year = ?", 
+                session["user_id"],
+                calendar.month_abbr[last_month], 
+                now.year - 1
+            )
+        else:
+            last_budget = db.execute("SELECT bucket_name, month_limit FROM budget_history WHERE owner_id = ? AND month = ? AND year = ?",
+                session["user_id"],
+                calendar.month_abbr[last_month], 
+                now.year
+            )
+
+        if last_budget and not new_month:
+            index = 0
+            for bucket in last_budget:
+                db.execute("INSERT INTO budget_history (owner_id, index_num, bucket_name, month_limit, month, year) VALUES (?, ?, ?, ?, ?, ?)", 
+                    session["user_id"],
+                    index,
+                    bucket["bucket_name"],
+                    bucket["month_limit"],
+                    abbrev_month, 
+                    full_yr
+                )
+
+                index += 1
 
         # Load user's categories and % allocation, if exist
         existing = db.execute("SELECT * FROM buckets WHERE owner_id = ?", session["user_id"])
@@ -646,4 +685,5 @@ if __name__ == '__main__':
 # Convert b/w month name and number - https://www.adamsmith.haus/python/answers/how-to-convert-between-month-name-and-month-number-in-python
 # Convert AM/PM time to 24 hr format consisely - https://stackoverflow.com/questions/19229190/how-to-convert-am-pm-timestmap-into-24hs-format-in-python
 # Custom filter - https://www.youtube.com/watch?v=sZl-H6GkHrk
+# Get last month, year - https://stackoverflow.com/questions/38794935/python-get-last-month-and-year 
     
